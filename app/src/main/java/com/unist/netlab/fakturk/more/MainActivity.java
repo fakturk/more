@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -15,6 +16,7 @@ public class MainActivity extends ActionBarActivity {
 
     SensorManager SM;
     TextView tv;
+    TextView tvMain;
 
     SensorEventListener sL = new SensorEventListener() {
         @Override
@@ -25,6 +27,14 @@ public class MainActivity extends ActionBarActivity {
                 SD+="values["+i+"] : "+se.values[i]+"`\n";
             }
             tv.setText(SD);
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(150, 50);
+            layoutParams = (RelativeLayout.LayoutParams)tvMain.getLayoutParams();
+            layoutParams.leftMargin= (int) (layoutParams.leftMargin+se.values[0]);
+            layoutParams.rightMargin = (int) (layoutParams.rightMargin+se.values[0]);
+            layoutParams.topMargin = (int) (layoutParams.topMargin+se.values[2]);
+            layoutParams.bottomMargin = (int) (layoutParams.bottomMargin+se.values[2]);
+
+            tvMain.setLayoutParams(layoutParams);
         }
 
         @Override
@@ -40,6 +50,7 @@ public class MainActivity extends ActionBarActivity {
 
         SM = (SensorManager)getSystemService(SENSOR_SERVICE);
         tv = (TextView)findViewById(R.id.textView);
+        tvMain = (TextView)findViewById(R.id.textViewMain);
         SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
 
     }
