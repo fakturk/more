@@ -6,8 +6,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -17,6 +20,7 @@ public class MainActivity extends ActionBarActivity {
     SensorManager SM;
     TextView tv;
     TextView tvMain;
+    Button buttonUp, buttonDown;
 
     SensorEventListener sL = new SensorEventListener() {
         @Override
@@ -31,10 +35,10 @@ public class MainActivity extends ActionBarActivity {
             layoutParams = (RelativeLayout.LayoutParams)tvMain.getLayoutParams();
             layoutParams.leftMargin= (int) (layoutParams.leftMargin+se.values[0]);
             layoutParams.rightMargin = (int) (layoutParams.rightMargin+se.values[0]);
-            layoutParams.topMargin = (int) (layoutParams.topMargin+se.values[2]);
-            layoutParams.bottomMargin = (int) (layoutParams.bottomMargin+se.values[2]);
+            layoutParams.topMargin = (int) (layoutParams.topMargin+se.values[1]-9.8-se.values[2]);
+            layoutParams.bottomMargin = (int) (layoutParams.bottomMargin+se.values[1]-9.8-se.values[2]);
 
-            tvMain.setLayoutParams(layoutParams);
+            //tvMain.setLayoutParams(layoutParams);
         }
 
         @Override
@@ -51,7 +55,31 @@ public class MainActivity extends ActionBarActivity {
         SM = (SensorManager)getSystemService(SENSOR_SERVICE);
         tv = (TextView)findViewById(R.id.textView);
         tvMain = (TextView)findViewById(R.id.textViewMain);
+        buttonUp =(Button)findViewById(R.id.buttonUp);
+        buttonDown = (Button)findViewById(R.id.buttonDown);
         SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
+
+        buttonUp.setOnClickListener(new View.OnClickListener() {
+
+
+            @Override
+            public void onClick(View v) {
+                DisplayMetrics metrics;
+                metrics = getApplicationContext().getResources().getDisplayMetrics();
+                float Textsize =tv.getTextSize()/metrics.density;
+                tvMain.setTextSize(Textsize*2);
+            }
+        });
+
+        buttonDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DisplayMetrics metrics;
+                metrics = getApplicationContext().getResources().getDisplayMetrics();
+                float Textsize =tv.getTextSize()/metrics.density;
+                tvMain.setTextSize(Textsize/2);
+            }
+        });
 
     }
 
@@ -77,4 +105,7 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }
+
