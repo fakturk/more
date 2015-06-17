@@ -75,13 +75,13 @@ public class MainActivity extends ActionBarActivity {
             {
                 tvMain.setX(left);
             }
-            if(tvMain.getX() + linear_acceleration[0]<right)
+            if(tvMain.getX() +width+ linear_acceleration[0]<right)
             {
                 tvMain.setX(tvMain.getX() + linear_acceleration[0]);
             }
-            else if (tvMain.getX() + linear_acceleration[0]>=right)
+            else if (tvMain.getX() +width+ linear_acceleration[0]>=right)
             {
-                tvMain.setX(right);
+                tvMain.setX(right-width);
             }
             if ((tvMain.getY()-(linear_acceleration[1]-se.values[2]))>top)
             {
@@ -91,13 +91,13 @@ public class MainActivity extends ActionBarActivity {
             {
                 tvMain.setY(top);
             }
-            if ((tvMain.getY()-(linear_acceleration[1]-se.values[2]))<bottom)
+            if ((tvMain.getY()+height-(linear_acceleration[1]-se.values[2]))<bottom)
             {
                 tvMain.setY((float)(tvMain.getY()-(linear_acceleration[1]-se.values[2])));
             }
-            else if((tvMain.getY()-(linear_acceleration[1]-se.values[2]))>=bottom)
+            else if((tvMain.getY()+height-(linear_acceleration[1]-se.values[2]))>=bottom)
             {
-                tvMain.setY(bottom);
+                tvMain.setY(bottom-height);
             }
 
 
