@@ -1,5 +1,7 @@
 package com.unist.netlab.fakturk.more;
 
+import android.app.Activity;
+import android.graphics.Canvas;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,6 +23,10 @@ public class MainActivity extends ActionBarActivity {
     TextView tv;
     TextView tvMain;
     Button buttonUp, buttonDown;
+
+    RelativeLayout root;
+
+
 
     SensorEventListener sL = new SensorEventListener() {
         @Override
@@ -54,8 +60,48 @@ public class MainActivity extends ActionBarActivity {
             tvMain.setLayoutParams(layoutParams);
             tvMain.invalidate();
 
-            tvMain.setX(tvMain.getX() + linear_acceleration[0]);
-            tvMain.setY((float)(tvMain.getY()-(linear_acceleration[1]-se.values[2])));
+            int top = root.getTop();
+            int bottom = root.getBottom();
+            int left = root.getLeft();
+            int right = root.getRight();
+            int height = tvMain.getHeight();
+            int width = tvMain.getWidth();
+
+            if(tvMain.getX() + linear_acceleration[0]>left)
+            {
+                tvMain.setX(tvMain.getX() + linear_acceleration[0]);
+            }
+            else if (tvMain.getX() + linear_acceleration[0]<=left)
+            {
+                tvMain.setX(left);
+            }
+            if(tvMain.getX() + linear_acceleration[0]<right)
+            {
+                tvMain.setX(tvMain.getX() + linear_acceleration[0]);
+            }
+            else if (tvMain.getX() + linear_acceleration[0]>=right)
+            {
+                tvMain.setX(right);
+            }
+            if ((tvMain.getY()-(linear_acceleration[1]-se.values[2]))>top)
+            {
+                tvMain.setY((float)(tvMain.getY()-(linear_acceleration[1]-se.values[2])));
+            }
+            else if((tvMain.getY()-(linear_acceleration[1]-se.values[2]))<=top)
+            {
+                tvMain.setY(top);
+            }
+            if ((tvMain.getY()-(linear_acceleration[1]-se.values[2]))<bottom)
+            {
+                tvMain.setY((float)(tvMain.getY()-(linear_acceleration[1]-se.values[2])));
+            }
+            else if((tvMain.getY()-(linear_acceleration[1]-se.values[2]))>=bottom)
+            {
+                tvMain.setY(bottom);
+            }
+
+
+
         }
 
         @Override
@@ -75,6 +121,9 @@ public class MainActivity extends ActionBarActivity {
         buttonUp =(Button)findViewById(R.id.buttonUp);
         buttonDown = (Button)findViewById(R.id.buttonDown);
         SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
+
+
+        root = (RelativeLayout) findViewById(R.id.root);
 
         buttonUp.setOnClickListener(new View.OnClickListener() {
 
