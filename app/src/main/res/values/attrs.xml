@@ -1,0 +1,6 @@
+<resources>
+    <declare-styleable name="SimulationView">
+        <attr name="simulationView" format="reference"/>
+
+    </declare-styleable>
+</resources>
