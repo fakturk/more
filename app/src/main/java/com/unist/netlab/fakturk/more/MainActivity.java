@@ -1,6 +1,6 @@
 package com.unist.netlab.fakturk.more;
 
-import android.content.Context;
+import android.app.Activity;
 import android.graphics.Canvas;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -8,12 +8,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Display;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Surface;
-import android.view.WindowManager;
+import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -23,71 +22,87 @@ public class MainActivity extends ActionBarActivity {
     SensorManager SM;
     TextView tv;
     TextView tvMain;
+    Button buttonUp, buttonDown;
 
-    public float oldX, oldY;
+    RelativeLayout root;
 
 
-    private float mSensorX;
-    private float mSensorY;
-    private float mSensorZ;
-    private long mSensorTimeStamp;
-    private Display mDisplay;
 
     SensorEventListener sL = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent se) {
-            if (se.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+            String SD="";
+            for (int i=0; i<se.values.length;i++)
             {
+                SD+="values["+i+"] : "+se.values[i]+"`\n";
+            }
+            tv.setText(SD);
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(150, 50);
+            layoutParams = (RelativeLayout.LayoutParams)tvMain.getLayoutParams();
+            //layoutParams.leftMargin= (int) (layoutParams.leftMargin+se.values[1]-9.8-se.values[2]);
+            //layoutParams.rightMargin = (int) (layoutParams.rightMargin+se.values[0]);
+            //layoutParams.topMargin = (int) (layoutParams.topMargin+se.values[1]-9.8-se.values[2]);
+            //layoutParams.bottomMargin = (int) (layoutParams.bottomMargin+se.values[1]-9.8-se.values[2]);
 
-                Log.v("fakturk", "x: "+se.values[0]+", y: "+se.values[1]+" , z: "+se.values[2]);
-                switch (mDisplay.getRotation()) {
-                    case Surface.ROTATION_0:
-                        mSensorX = se.values[0];
-                        mSensorY = se.values[1];
-                        break;
-                    case Surface.ROTATION_90:
-                        mSensorX = -se.values[1];
-                        mSensorY = se.values[0];
-                        break;
-                    case Surface.ROTATION_180:
-                        mSensorX = -se.values[0];
-                        mSensorY = -se.values[1];
-                        break;
-                    case Surface.ROTATION_270:
-                        mSensorX = se.values[1];
-                        mSensorY = -se.values[0];
-                        break;
-                }
-                mSensorZ = se.values[2];
-                mSensorTimeStamp = se.timestamp;
-                Particle corner = new Particle();
-                corner.updatePosition(mSensorX, mSensorY, mSensorZ, mSensorTimeStamp);
-                //corner.resolveCollisionWithBounds(mHorizontalBound, mVerticalBound);
-                String SD = "";
-                for (int i = 0; i < se.values.length; i++)
-                {
-                    SD += "values[" + i + "] : " + se.values[i] +"\n";
-                }
-                SD +="mPosX : "+corner.mPosX+"\n";
-                SD +="mPosY : "+corner.mPosY+"\n";
+            final float alpha = (float) 0.8;
+
+            float[] gravity = new float[3];
+            gravity[0] = alpha * gravity[0] + (1 - alpha) * se.values[0];
+            gravity[1] = alpha * gravity[1] + (1 - alpha) * se.values[1];
+            gravity[2] = alpha * gravity[2] + (1 - alpha) * se.values[2];
+
+            float[] linear_acceleration = new float[3];
+            linear_acceleration[0] = se.values[0] - gravity[0];
+            linear_acceleration[1] = se.values[1] - gravity[1];
+            linear_acceleration[2] = se.values[2] - gravity[2];
 
 
+            tvMain.setLayoutParams(layoutParams);
+            tvMain.invalidate();
 
-                tv.setText(SD);
-                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(150, 50);
-                layoutParams = (RelativeLayout.LayoutParams) tvMain.getLayoutParams();
-                //layoutParams.leftMargin = (int) (layoutParams.leftMargin - (se.values[1]-oldX));
-                //layoutParams.rightMargin = -250;
-                //layoutParams.topMargin = (int) (layoutParams.topMargin - (se.values[2]-oldY));
-                //layoutParams.bottomMargin = -250;
+            int top = root.getTop();
+            int bottom = root.getBottom();
+            int left = root.getLeft();
+            int right = root.getRight();
+            int height = tvMain.getHeight();
+            int width = tvMain.getWidth();
 
-                tvMain.setLayoutParams(layoutParams);
-                oldX = (int) (se.values[1]);
-                oldY = (int) (se.values[2]);
+            if(tvMain.getX() + linear_acceleration[0]>left)
+            {
+                tvMain.setX(tvMain.getX() + linear_acceleration[0]);
+            }
+            else if (tvMain.getX() + linear_acceleration[0]<=left)
+            {
+                tvMain.setX(left);
+            }
+            if(tvMain.getX() +width+ linear_acceleration[0]<right)
+            {
+                tvMain.setX(tvMain.getX() + linear_acceleration[0]);
+            }
+            else if (tvMain.getX() +width+ linear_acceleration[0]>=right)
+            {
+                tvMain.setX(right-width);
+            }
+            if ((tvMain.getY()-(linear_acceleration[1]-se.values[2]))>top)
+            {
+                tvMain.setY((float)(tvMain.getY()-(linear_acceleration[1]-se.values[2])));
+            }
+            else if((tvMain.getY()-(linear_acceleration[1]-se.values[2]))<=top)
+            {
+                tvMain.setY(top);
+            }
+            if ((tvMain.getY()+height-(linear_acceleration[1]-se.values[2]))<bottom)
+            {
+                tvMain.setY((float)(tvMain.getY()-(linear_acceleration[1]-se.values[2])));
+            }
+            else if((tvMain.getY()+height-(linear_acceleration[1]-se.values[2]))>=bottom)
+            {
+                tvMain.setY(bottom-height);
             }
 
-        }
 
+
+        }
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -100,54 +115,39 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SM = (SensorManager)getSystemService(SENSOR_SERVICE);
+        SM = (SensorManager) getSystemService(SENSOR_SERVICE);
         tv = (TextView)findViewById(R.id.textView);
         tvMain = (TextView)findViewById(R.id.textViewMain);
-        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
-        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ORIENTATION),SensorManager.SENSOR_DELAY_GAME);
+        buttonUp =(Button)findViewById(R.id.buttonUp);
+        buttonDown = (Button)findViewById(R.id.buttonDown);
+        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
 
-        WindowManager mWindowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
-        mDisplay = mWindowManager.getDefaultDisplay();
 
+        root = (RelativeLayout) findViewById(R.id.root);
+
+        buttonUp.setOnClickListener(new View.OnClickListener() {
+
+
+            @Override
+            public void onClick(View v) {
+                DisplayMetrics metrics;
+                metrics = getApplicationContext().getResources().getDisplayMetrics();
+                float Textsize =tv.getTextSize()/metrics.density;
+                tvMain.setTextSize(Textsize*2);
+            }
+        });
+
+        buttonDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DisplayMetrics metrics;
+                metrics = getApplicationContext().getResources().getDisplayMetrics();
+                float Textsize =tv.getTextSize()/metrics.density;
+                tvMain.setTextSize(Textsize/2);
+            }
+        });
 
     }
-
-    public class Particle {
-        /* coefficient of restitution */
-        private static final float COR = 0.7f;
-
-        public float mPosX;
-        public float mPosY;
-        private float mVelX;
-        private float mVelY;
-
-        public void updatePosition(float sx, float sy, float sz, long timestamp) {
-            float dt = (System.nanoTime() - timestamp) / 1000000000.0f;
-            mVelX += -sx * dt;
-            mVelY += -sy * dt;
-
-            mPosX += mVelX * dt;
-            mPosY += mVelY * dt;
-        }
-
-        public void resolveCollisionWithBounds(float mHorizontalBound, float mVerticalBound) {
-            if (mPosX > mHorizontalBound) {
-                mPosX = mHorizontalBound;
-                mVelX = -mVelX * COR;
-            } else if (mPosX < -mHorizontalBound) {
-                mPosX = -mHorizontalBound;
-                mVelX = -mVelX * COR;
-            }
-            if (mPosY > mVerticalBound) {
-                mPosY = mVerticalBound;
-                mVelY = -mVelY * COR;
-            } else if (mPosY < -mVerticalBound) {
-                mPosY = -mVerticalBound;
-                mVelY = -mVelY * COR;
-            }
-        }
-    }
-
 
 
     @Override
@@ -171,4 +171,7 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }
+
