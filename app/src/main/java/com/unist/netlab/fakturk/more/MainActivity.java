@@ -164,35 +164,71 @@ public class MainActivity extends ActionBarActivity {
             timestamp = se.timestamp;
             float[] deltaRotationMatrix = new float[9];
             SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
-
+            /*
             for (int i = 0; i < deltaRotationMatrix.length; i++)
             {
                 SD += "delta [" + (i+3) + "] : " + deltaRotationMatrix[i] + "`\n";
             }
+            */
 
             tv2.setText(SD);
+            //tvMain.setX(originalWidth*2);
+            //tvMain.setY(originalHeight*2);
 
-            if (tvMain.getX() + se.values[1] > left) {
-                tvMain.setX(tvMain.getX() + se.values[1]);
-            } else if (tvMain.getX() + se.values[1] <= left) {
+            if (tvMain.getX() - se.values[1] +se.values[2]> left) {
+                smoothMove('x', tvMain.getX(), (-se.values[1] + se.values[2]));
+            } else if (tvMain.getX() - se.values[1] +se.values[2] <= left) {
                 tvMain.setX(left);
             }
-            if (tvMain.getX() + width + se.values[1] < right) {
-                tvMain.setX(tvMain.getX() + se.values[1]);
-            } else if (tvMain.getX() + width + se.values[1] >= right) {
+            if (tvMain.getX() + width - se.values[1] +se.values[2] < right) {
+                smoothMove('x', tvMain.getX(), (-se.values[1] + se.values[2]));
+            } else if (tvMain.getX() + width - se.values[1] +se.values[2] >= right) {
                 tvMain.setX(right - width);
             }
-            if ((tvMain.getY() - (se.values[2] )) > top) {
-                tvMain.setY((float) (tvMain.getY() - (se.values[2] )));
-            } else if ((tvMain.getY() - (se.values[2] )) <= top) {
+            if ((tvMain.getY() - (se.values[0]  +se.values[2])) > top) {
+                smoothMove('y', tvMain.getY(), -(se.values[0] + se.values[2]));
+            } else if ((tvMain.getY() - (se.values[0]  +se.values[2])) <= top) {
                 tvMain.setY(top);
             }
-            if ((tvMain.getY() + height - (se.values[2] )) < bottom) {
-                tvMain.setY((float) (se.values[2] ));
-            } else if ((tvMain.getY() + height - (se.values[2] )) >= bottom) {
+            if ((tvMain.getY() + height - (se.values[0]  +se.values[2])) < bottom) {
+                smoothMove('y', tvMain.getY(), -(se.values[0] + se.values[2]));
+            } else if ((tvMain.getY() + height - (se.values[0] +se.values[2] )) >= bottom) {
                 tvMain.setY(bottom - height);
             }
+
         }
+    }
+
+    void smoothMove(char type,float position, double subtractValue)
+    {
+        float smooth ;
+        int smoothLevel = 3;
+        if (type=='x')
+        {
+            if (smoothLevel!=0) {
+                for (int i = 0; i < smoothLevel; i++) {
+                    smooth = (float) (position + subtractValue / (2 ^ (i + 1)));
+                    tvMain.setX(smooth);
+                }
+            }
+            smooth = (float) (position + subtractValue/(2^(smoothLevel)));
+            tvMain.setX(smooth);
+
+        }
+        else if (type=='y')
+        {
+            if (smoothLevel!=0) {
+                for (int i = 0; i < smoothLevel; i++) {
+                    smooth = (float) (position + subtractValue / (2 ^ (i + 1)));
+                    tvMain.setY(smooth);
+                }
+            }
+                smooth = (float) (position + subtractValue/(2^(smoothLevel)));
+                tvMain.setY(smooth);
+
+
+        }
+
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,7 +242,7 @@ public class MainActivity extends ActionBarActivity {
         buttonUp =(Button)findViewById(R.id.buttonUp);
         buttonDown = (Button)findViewById(R.id.buttonDown);
         SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
-        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE),SensorManager.SENSOR_DELAY_FASTEST);
+        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE),SensorManager.SENSOR_DELAY_GAME);
 
 
         root = (RelativeLayout) findViewById(R.id.root);
