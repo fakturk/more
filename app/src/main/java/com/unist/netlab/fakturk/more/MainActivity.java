@@ -64,7 +64,7 @@ public class MainActivity extends ActionBarActivity {
 
             for (int i = 0; i < se.values.length; i++)
             {
-                SD += "values[" + i + "] : " + se.values[i] + "`\n";
+                SD += "acceleration[" + i + "] : " + se.values[i] + "`\n";
             }
             tv.setText(SD);
             //RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(150, 50);
@@ -124,7 +124,7 @@ public class MainActivity extends ActionBarActivity {
         {
             for (int i = 0; i < se.values.length; i++)
             {
-                SD += "values[" + (i+3) + "] : " + se.values[i] + "`\n";
+                SD += "gyroscope[" + (i+3) + "] : " + se.values[i] + "`\n";
             }
 
             tv2.setText(SD);
