@@ -3,18 +3,11 @@ package com.unist.netlab.fakturk.more;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -26,13 +19,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
-public class MainActivity extends Activity implements SensorEventListener
+public class MainActivity extends Activity
 {
 
     SensorManager SM;
-    TextView tv, tv2;
+    TextView tv;
     TextView tvMain;
-    Button buttonUp, buttonDown, buttonStopService, buttonStartService, buttonFunc;
+    Button buttonUp, buttonDown;
     Move move;
 
 
@@ -43,21 +36,6 @@ public class MainActivity extends Activity implements SensorEventListener
     static final String LOG_TAG = "ServiceActivity";
 
 
-     @Override
-    public void onSensorChanged(SensorEvent se)
-    {
-
-        //move = new Move(se,  tv,  tv2,   tvMain,  root);
-        //move.moveIt();
-        callFunc();
-
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy)
-    {
-
-    }
 
 
 
@@ -74,28 +52,26 @@ public class MainActivity extends Activity implements SensorEventListener
 
         //SM = (SensorManager) getSystemService(SENSOR_SERVICE);
         tv = (TextView)  findViewById(R.id.textView);
-        tv2 = (TextView) findViewById(R.id.textView2);
+
         tvMain = (TextView) findViewById(R.id.textViewMain);
         buttonUp = (Button) findViewById(R.id.buttonSizeUp);
         buttonDown = (Button) findViewById(R.id.buttonSizeDown);
-        buttonStartService = (Button) findViewById(R.id.buttonStartService);
-        buttonStopService = (Button) findViewById(R.id.buttonStopService);
-        buttonFunc = (Button) findViewById(R.id.buttonFunc);
-        buttonStopService.setEnabled(false);
-        buttonFunc.setEnabled(false);
+
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                       // double latitude = intent.getDoubleExtra(LocationBroadcastService.EXTRA_LATITUDE, 0);
-                       // double longitude = intent.getDoubleExtra(LocationBroadcastService.EXTRA_LONGITUDE, 0);
+
                         tv.setText("ACC : \n"+intent.getStringExtra("ACC")+
                                         "\n"+
                                 "GYR : \n"+intent.getStringExtra("GYR")+
                                          "\n"+
                                 "GRA : \n"+intent.getStringExtra("GRA"));
-                        //callFunc();
+
+                        //move = new Move(se,  tv,  tv2,   tvMain,  root);
+                        //move.moveIt();
+
                     }
                 }, new IntentFilter(SensorService.ACTION_SENSOR_BROADCAST)
         );
@@ -139,45 +115,13 @@ public class MainActivity extends Activity implements SensorEventListener
             }
         });
 
-        buttonStartService.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                serviceStart();
-
-
-            }
-        });
-
-        buttonStopService.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                serviceStop();
-            }
-        });
-
-        buttonFunc.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                callFunc();
-            }
-        });
-
-
-
-
-
+//
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        stopService(new Intent(this, SensorService.class));
+       // stopService(new Intent(this, SensorService.class));
     }
 
 
@@ -212,52 +156,6 @@ public class MainActivity extends Activity implements SensorEventListener
 
         return super.onOptionsItemSelected(item);
     }
-
-    AIDLService mService;
-    boolean mBound;
-    private ServiceConnection mConnection = new ServiceConnection()
-    {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder)
-        {
-            mService = AIDLService.Stub.asInterface(iBinder);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName)
-        {
-            mService=null;
-        }
-    };
-
-    public void serviceStart()
-    {
-
-        Intent intent = new Intent(this,SensorService.class);
-        getApplicationContext().bindService(intent,mConnection, Context.BIND_AUTO_CREATE);
-        buttonStartService.setEnabled(false);
-        buttonStopService.setEnabled(true);
-        buttonFunc.setEnabled(true);
-
-    }
-
-    public void serviceStop()
-    {
-        getApplicationContext().unbindService(mConnection);
-        stopService(new Intent(this,SensorService.class));
-        buttonStartService.setEnabled(true);
-        buttonStopService.setEnabled(false);
-        buttonFunc.setEnabled(false);
-    }
-
-    private void callFunc(){
-        try {
-            tv.setText(mService.func());
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
 
 
 }

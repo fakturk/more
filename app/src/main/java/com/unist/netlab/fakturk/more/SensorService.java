@@ -9,23 +9,15 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.opencsv.CSVWriter;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-public class SensorService extends Service
+public class SensorService extends Service implements SensorEventListener
 {
-    CSVWriter writer = null;
+    //CSVWriter writer = null;
 
     private String text, text_acc="not catched\n", text_gyr="not catched\n", text_gra="not catched\n";
     SensorManager SM;
@@ -35,55 +27,75 @@ public class SensorService extends Service
     static final String LOG_TAG = "SimpleService";
 
     Intent intent = new Intent(SensorService.this, MainActivity.class);
+    NotificationCompat.Builder mCompatBuilder;
+    NotificationManager nm;
+    Intent notiIntent;
 
+    @Override
+    public void onSensorChanged(SensorEvent se)
+    {
+        Log.d(LOG_TAG, "onSensorChanged");
+
+        sendBroadcastMessage(se);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i)
+    {
+
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
         Toast.makeText(this, "Service Started", Toast.LENGTH_LONG).show();
+        SM = (SensorManager)getSystemService(SENSOR_SERVICE);
+
+        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
+        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_NORMAL);
+
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Intent bIntent = new Intent(SensorService.this, MainActivity.class);
+        PendingIntent pbIntent = PendingIntent.getActivity(SensorService.this, 0 , bIntent, 0);
+        NotificationCompat.Builder bBuilder =
+                new NotificationCompat.Builder(this)
+                        //.setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle("Title")
+                        .setContentText("Subtitle")
+                        .setAutoCancel(true)
+                        .setOngoing(true)
+                        .setContentIntent(pbIntent);
+        Notification barNotif = bBuilder.build();
+        this.startForeground(1, barNotif);
+
+       // mNotificationManager.notify(1,barNotif);
 
 
-       return super.onStartCommand(intent, flags, startId);
+       return SensorService.START_STICKY;
     }
 
     @Override
     public void onCreate() {
-        super.onCreate();
+        //super.onCreate();
         Toast.makeText(this, "Service Created", Toast.LENGTH_LONG).show();
-        Log.d(LOG_TAG, "onStartCommand");
-        SM = (SensorManager)getSystemService(SENSOR_SERVICE);
-        SensorEventListener sL = new SensorEventListener() {
-            @Override
-            public void onAccuracyChanged(Sensor arg0, int arg1) {
-            }
-            @Override
-            public void onSensorChanged(SensorEvent se) {
-                Log.d(LOG_TAG, "onSensorChanged");
+        //Log.d(LOG_TAG, "onStartCommand");
 
-                sendBroadcastMessage(se);
-
-
-
-                //Intent bIntent = new Intent(SensorService.this, MainActivity.class);
-                //new SensorEventLoggerTask().execute(se);
-
-
-
-               // intent.putExtra("measurement",text);
-                //sendBroadcast(intent);
-            }
-        };
-        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
-        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_NORMAL);
 
 
     }
 
+    @Override
+    public void onDestroy(){
 
-    NotificationCompat.Builder mCompatBuilder;
-    NotificationManager nm;
-    Intent notiIntent;
+        Toast.makeText(this, "Service Stopped", Toast.LENGTH_LONG).show();
+        Log.d( LOG_TAG, "onDestroy" );
+        SM.unregisterListener(this);
+        //nm.cancel(333);
+        //super.onDestroy();
+    }
+
+
 
 
     @Override
@@ -100,38 +112,19 @@ public class SensorService extends Service
 
 
         //nm.notify(333, mCompatBuilder.build());
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Intent bIntent = new Intent(SensorService.this, MainActivity.class);
-        PendingIntent pbIntent = PendingIntent.getActivity(SensorService.this, 0 , bIntent, 0);
-        NotificationCompat.Builder bBuilder =
-                new NotificationCompat.Builder(this)
-                        //.setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle("Title")
-                        .setContentText("Subtitle")
-                        .setAutoCancel(true)
-                        .setOngoing(true)
-                        .setContentIntent(pbIntent);
-        Notification barNotif = bBuilder.build();
-        this.startForeground(1, barNotif);
         return mBinder;
 
         */
+
+
+
+
+
         return null;
 
 
     }
-    private final AIDLService.Stub mBinder = new AIDLService.Stub() {
-        //Write function of AIDLService
-        public String func(){
-            text = "";
-            text += "Accelerometer\n" + text_acc;
-            text += "Gyroscope\n" + text_gyr;
-            text += "Gravity\n" + text_gra;
 
-            return text;
-        }
-    };
 
 
     private void sendBroadcastMessage(SensorEvent se) {
@@ -173,13 +166,13 @@ public class SensorService extends Service
             intent.putExtra("GYR", text_gyr);
             intent.putExtra("GRA", text_gra);
 
-            try {
-                writer = new CSVWriter(new FileWriter(Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator+"SensorData.csv"),',');
-                writer.writeNext(entries);
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                writer = new CSVWriter(new FileWriter(Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator+"SensorData.csv"),',');
+//                writer.writeNext(entries);
+//                writer.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
 
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -187,33 +180,26 @@ public class SensorService extends Service
     }
 
 
-    @Override
-    public boolean onUnbind(Intent intent){
-        //SM.unregisterListener(sL);
-//		nm.cancel(222);
-        super.onUnbind(intent);
-        return true;
-    }
-    @Override
-    public void onDestroy(){
+//    @Override
+//    public boolean onUnbind(Intent intent){
+//        //SM.unregisterListener(sL);
+////		nm.cancel(222);
+//        super.onUnbind(intent);
+//        return true;
+//    }
 
-        Toast.makeText(this, "Service Stopped", Toast.LENGTH_LONG).show();
-        Log.d( LOG_TAG, "onDestroy" );
-        //SM.unregisterListener(sL);
-        //nm.cancel(333);
-        super.onDestroy();
-    }
+
 
 }
 
-class SensorEventLoggerTask extends
-        AsyncTask<SensorEvent, Void, Void>
-{
-    @Override
-    protected Void doInBackground(SensorEvent... events) {
-        SensorEvent event = events[0];
-        // log the value
-        return null;
-    }
-}
+//class SensorEventLoggerTask extends
+//        AsyncTask<SensorEvent, Void, Void>
+//{
+//    @Override
+//    protected Void doInBackground(SensorEvent... events) {
+//        SensorEvent event = events[0];
+//        // log the value
+//        return null;
+//    }
+//}
 
