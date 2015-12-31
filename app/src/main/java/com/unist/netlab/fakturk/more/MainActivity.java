@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
@@ -22,7 +21,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity
 {
 
-    SensorManager SM;
+    //SensorManager SM;
     TextView tv;
     TextView tvMain;
     Button buttonUp, buttonDown;
@@ -31,9 +30,13 @@ public class MainActivity extends Activity
 
     RelativeLayout root;
 
-    MyReceiver myReceiver=null;
+    //MyReceiver myReceiver=null;
     Intent i;
     static final String LOG_TAG = "ServiceActivity";
+
+
+
+
 
 
 
@@ -46,6 +49,10 @@ public class MainActivity extends Activity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        root = (RelativeLayout) findViewById(R.id.root);
+
+
 
         i= new Intent(this, SensorService.class);
         Log.d(LOG_TAG, "onCreate/startService");
@@ -69,7 +76,7 @@ public class MainActivity extends Activity
                                          "\n"+
                                 "GRA : \n"+intent.getStringExtra("GRA"));
 
-                        //move = new Move(se,  tv,  tv2,   tvMain,  root);
+                        //move = new Move(se,  tv,   tvMain,  root);
                         //move.moveIt();
 
                     }
@@ -85,7 +92,7 @@ public class MainActivity extends Activity
 
 
 
-        root = (RelativeLayout) findViewById(R.id.root);
+
 
         buttonUp.setOnClickListener(new View.OnClickListener()
         {
@@ -121,7 +128,10 @@ public class MainActivity extends Activity
     @Override
     protected void onPause() {
         super.onPause();
-       // stopService(new Intent(this, SensorService.class));
+        //File sd = Environment.getExternalStorageDirectory();
+        //String path = sd + "/" + "SensorData.db" + ".xml";
+
+
     }
 
 
@@ -148,7 +158,7 @@ public class MainActivity extends Activity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+
         if (id == R.id.action_settings)
         {
             return true;
@@ -157,7 +167,13 @@ public class MainActivity extends Activity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onDestroy()
+    {
 
+
+        super.onDestroy();
+    }
 }
  class MyReceiver extends BroadcastReceiver{
     static final String Log_Tag = "MyReceiver";

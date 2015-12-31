@@ -20,11 +20,11 @@ public class Move
     TextView tvMain;
     RelativeLayout root;
 
-    public Move(SensorEvent se, TextView tv, TextView tv2, TextView tvMain, RelativeLayout root)
+    public Move(SensorEvent se, TextView tv, TextView tvMain, RelativeLayout root)
     {
         this.se = se;
         this.tv = tv;
-        this.tv2 = tv2;
+
         this.tvMain = tvMain;
         this.root = root;
     }
