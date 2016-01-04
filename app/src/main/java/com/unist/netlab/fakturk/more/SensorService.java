@@ -18,9 +18,6 @@ import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Calendar;
 
 
@@ -81,17 +78,17 @@ public class SensorService extends Service implements SensorEventListener
         SM = (SensorManager)getSystemService(SENSOR_SERVICE);
 
 
-        FileOutputStream fOut = null;
-        try
-        {
-            myFile.createNewFile();
-            fOut = new FileOutputStream(myFile);
-            bos = new BufferedOutputStream(fOut);
-        }catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        FileOutputStream fOut = null;
+//        try
+//        {
+//            myFile.createNewFile();
+//            fOut = new FileOutputStream(myFile);
+//            bos = new BufferedOutputStream(fOut);
+//        }catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
 
 
@@ -133,13 +130,13 @@ public class SensorService extends Service implements SensorEventListener
         Toast.makeText(this, "Service Stopped", Toast.LENGTH_LONG).show();
         Log.d( LOG_TAG, "onDestroy" );
         SM.unregisterListener(this);
-        try
-        {
-            bos.close();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+//        try
+//        {
+//            bos.close();
+//        } catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
 
         //super.onDestroy();
     }
@@ -160,7 +157,8 @@ public class SensorService extends Service implements SensorEventListener
     private void sendBroadcastMessage(SensorEvent se) {
         if (se != null) {
             Intent intent = new Intent(ACTION_SENSOR_BROADCAST);
-            String[] entries = new String[9];
+            float[] entries = new float[9];
+            float timestep = 0;
 
             switch(se.sensor.getType()){
                 case Sensor.TYPE_ACCELEROMETER :
@@ -168,6 +166,9 @@ public class SensorService extends Service implements SensorEventListener
                     text_acc += "X = " + se.values[0] + "\n";
                     text_acc += "Y = " + se.values[1] + "\n";
                     text_acc += "Z = " + se.values[2] + "\n";
+                    entries[0]=se.values[0];
+                    entries[1]=se.values[1];
+                    entries[2]=se.values[2];
 
 
                     //Change the text of notification to accelerometer using setContetnText
@@ -179,6 +180,10 @@ public class SensorService extends Service implements SensorEventListener
                     text_gyr += "X = " + se.values[0] + "\n";
                     text_gyr += "Y = " + se.values[1] + "\n";
                     text_gyr += "Z = " + se.values[2] + "\n";
+                    entries[3]=se.values[0];
+                    entries[4]=se.values[1];
+                    entries[5]=se.values[2];
+                    timestep = se.timestamp;
 
 
                 case Sensor.TYPE_GRAVITY :
@@ -186,27 +191,33 @@ public class SensorService extends Service implements SensorEventListener
                     text_gra += "X = " + se.values[0] + "\n";
                     text_gra += "Y = " + se.values[1] + "\n";
                     text_gra += "Z = " + se.values[2] + "\n";
+                    entries[6]=se.values[0];
+                    entries[7]=se.values[1];
+                    entries[8]=se.values[2];
 
 
             }
             intent.putExtra("ACC", text_acc);
             intent.putExtra("GYR", text_gyr);
             intent.putExtra("GRA", text_gra);
+            intent.putExtra("SEN",entries);
+            intent.putExtra("TIME",timestep);
+
 
 //
-            try
-            {
-                Toast.makeText(this, "Teheey", Toast.LENGTH_LONG).show();
-                bos.write("ACC\n".getBytes());
-                bos.write(text_acc.getBytes());
-                bos.write("GYR\n".getBytes());
-                bos.write(text_gyr.getBytes());
-                bos.write("GRA\n".getBytes());
-                bos.write(text_gra.getBytes());
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+//            try
+//            {
+//                Toast.makeText(this, "Teheey", Toast.LENGTH_LONG).show();
+//                bos.write("ACC\n".getBytes());
+//                bos.write(text_acc.getBytes());
+//                bos.write("GYR\n".getBytes());
+//                bos.write(text_gyr.getBytes());
+//                bos.write("GRA\n".getBytes());
+//                bos.write(text_gra.getBytes());
+//            } catch (IOException e)
+//            {
+//                e.printStackTrace();
+//            }
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
     }

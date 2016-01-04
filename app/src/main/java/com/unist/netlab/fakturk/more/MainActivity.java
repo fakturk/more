@@ -76,8 +76,8 @@ public class MainActivity extends Activity
                                          "\n"+
                                 "GRA : \n"+intent.getStringExtra("GRA"));
 
-                        //move = new Move(se,  tv,   tvMain,  root);
-                        //move.moveIt();
+                        move = new Move(intent.getFloatArrayExtra("SEN"), intent.getFloatExtra("TIME",0),  tv,   tvMain,  root);
+                        move.moveIt();
 
                     }
                 }, new IntentFilter(SensorService.ACTION_SENSOR_BROADCAST)

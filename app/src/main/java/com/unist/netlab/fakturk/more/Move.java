@@ -1,8 +1,7 @@
 package com.unist.netlab.fakturk.more;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.util.Log;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -15,18 +14,27 @@ import static android.util.FloatMath.sqrt;
  */
 public class Move
 {
-    SensorEvent se;
-    TextView tv, tv2;
+    //SensorEvent se;
+    TextView tv;
     TextView tvMain;
     RelativeLayout root;
+    float[] events =new float[9];;
+    float timestamp;
 
-    public Move(SensorEvent se, TextView tv, TextView tvMain, RelativeLayout root)
+    public Move(float[] e, float timestamp, TextView tv, TextView tvMain, RelativeLayout root)
     {
-        this.se = se;
+        //this.se = se;
         this.tv = tv;
 
         this.tvMain = tvMain;
         this.root = root;
+        this.timestamp = timestamp;
+       // events
+        for (int i=0;i<8;i++)
+        {
+            Log.d("eventAtama", Float.toString(e[i]));
+            this.events[i]=e[i];
+        }
     }
 
     public void moveIt()
@@ -44,13 +52,13 @@ public class Move
         int width = tvMain.getWidth();
 
 
-        if (se.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-
-            for (int i = 0; i < se.values.length; i++)
-            {
-                SD += "acceleration[" + i + "] : " + se.values[i] + "`\n";
-            }
-            tv.setText(SD);
+//        if (se.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+//
+//            for (int i = 0; i < se.values.length; i++)
+//            {
+//                SD += "acceleration[" + i + "] : " + se.values[i] + "`\n";
+//            }
+           // tv.setText(SD);
             //RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(150, 50);
             //layoutParams = (RelativeLayout.LayoutParams) tvMain.getLayoutParams();
             //layoutParams.leftMargin= (int) (layoutParams.leftMargin+se.values[1]-9.8-se.values[2]);
@@ -61,14 +69,14 @@ public class Move
             final float alpha = (float) 0.8;
 
             float[] gravity = new float[3];
-            gravity[0] = alpha * gravity[0] + (1 - alpha) * se.values[0];
-            gravity[1] = alpha * gravity[1] + (1 - alpha) * se.values[1];
-            gravity[2] = alpha * gravity[2] + (1 - alpha) * se.values[2];
+            gravity[0] = alpha * gravity[0] + (1 - alpha) * events[0];
+            gravity[1] = alpha * gravity[1] + (1 - alpha) * events[1];
+            gravity[2] = alpha * gravity[2] + (1 - alpha) * events[2];
 
             float[] linear_acceleration = new float[3];
-            linear_acceleration[0] = se.values[0] - gravity[0];
-            linear_acceleration[1] = se.values[1] - gravity[1];
-            linear_acceleration[2] = se.values[2] - gravity[2];
+            linear_acceleration[0] = events[0] - gravity[0];
+            linear_acceleration[1] = events[1] - gravity[1];
+            linear_acceleration[2] = events[2] - gravity[2];
 
 
             // tvMain.setLayoutParams(layoutParams);
@@ -103,25 +111,25 @@ public class Move
             */
 
 
-        }
-        if (se.sensor.getType() == Sensor.TYPE_GYROSCOPE)
-        {
-            for (int i = 0; i < se.values.length; i++)
-            {
-                SD += "gyroscope[" + (i+3) + "] : " + se.values[i] + "`\n";
-            }
+//        }
+//        if (se.sensor.getType() == Sensor.TYPE_GYROSCOPE)
+//        {
+//            for (int i = 0; i < se.values.length; i++)
+//            {
+//                SD += "gyroscope[" + (i+3) + "] : " + se.values[i] + "`\n";
+//            }
 
-            tv2.setText(SD);
+          //  tv2.setText(SD);
             final float NS2S = 1.0f / 1000000000.0f;
             final float[] deltaRotationVector = new float[4];
-            float timestamp = 0;
+            float tStamp = 0;
             final double EPSILON = 0.000001;
-            if (timestamp != 0) {
-                final float dT = (se.timestamp - timestamp) * NS2S;
+            if (tStamp != 0) {
+                final float dT = (timestamp - tStamp) * NS2S;
                 // Axis of the rotation sample, not normalized yet.
-                float axisX = se.values[0];
-                float axisY = se.values[1];
-                float axisZ = se.values[2];
+                float axisX = events[3];
+                float axisY = events[4];
+                float axisZ = events[5];
 
                 // Calculate the angular speed of the sample
                 float omegaMagnitude = sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
@@ -145,7 +153,7 @@ public class Move
                 deltaRotationVector[2] = sinThetaOverTwo * axisZ;
                 deltaRotationVector[3] = cosThetaOverTwo;
             }
-            timestamp = se.timestamp;
+            tStamp = timestamp;
             float[] deltaRotationMatrix = new float[9];
             SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
             /*
@@ -155,32 +163,32 @@ public class Move
             }
             */
 
-            tv2.setText(SD);
+            //tv2.setText(SD);
             //tvMain.setX(originalWidth*2);
             //tvMain.setY(originalHeight*2);
 
-            if (tvMain.getX() - se.values[1] +se.values[2]> left) {
-                smoothMove('x', tvMain.getX(), (-se.values[1] + se.values[2]));
-            } else if (tvMain.getX() - se.values[1] +se.values[2] <= left) {
+            if (tvMain.getX() - events[4] +events[5]> left) {
+                smoothMove('x', tvMain.getX(), (-events[4] + events[5]));
+            } else if (tvMain.getX() - events[4] +events[5] <= left) {
                 tvMain.setX(left);
             }
-            if (tvMain.getX() + width - se.values[1] +se.values[2] < right) {
-                smoothMove('x', tvMain.getX(), (-se.values[1] + se.values[2]));
-            } else if (tvMain.getX() + width - se.values[1] +se.values[2] >= right) {
+            if (tvMain.getX() + width - events[4] +events[5] < right) {
+                smoothMove('x', tvMain.getX(), (-events[4] + events[5]));
+            } else if (tvMain.getX() + width - events[4] +events[5] >= right) {
                 tvMain.setX(right - width);
             }
-            if ((tvMain.getY() - (se.values[0]  +se.values[2])) > top) {
-                smoothMove('y', tvMain.getY(), -(se.values[0] + se.values[2]));
-            } else if ((tvMain.getY() - (se.values[0]  +se.values[2])) <= top) {
+            if ((tvMain.getY() - (events[3]  +events[5])) > top) {
+                smoothMove('y', tvMain.getY(), -(events[3] + events[5]));
+            } else if ((tvMain.getY() - (events[3]  +events[5])) <= top) {
                 tvMain.setY(top);
             }
-            if ((tvMain.getY() + height - (se.values[0]  +se.values[2])) < bottom) {
-                smoothMove('y', tvMain.getY(), -(se.values[0] + se.values[2]));
-            } else if ((tvMain.getY() + height - (se.values[0] +se.values[2] )) >= bottom) {
+            if ((tvMain.getY() + height - (events[3]  +events[5])) < bottom) {
+                smoothMove('y', tvMain.getY(), -(events[3] + events[5]));
+            } else if ((tvMain.getY() + height - (events[3] +events[5] )) >= bottom) {
                 tvMain.setY(bottom - height);
             }
 
-        }
+//        }
     }
 
     void smoothMove(char type,float position, double subtractValue)
