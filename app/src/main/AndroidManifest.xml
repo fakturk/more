@@ -22,6 +22,11 @@
             android:enabled="true"
             android:exported="true">
         </service>
+        <receiver android:name=".MyReceiver" android:enabled="true">
+            <intent-filter>
+                <action android:name="com.unist.netlab.fakturk.more.SensorService.MY_ACTION"></action>
+            </intent-filter>
+        </receiver>
     </application>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 

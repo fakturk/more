@@ -27,6 +27,9 @@ public class SensorService extends Service implements SensorEventListener
 
     private String text, text_acc="not catched\n", text_gyr="not catched\n", text_gra="not catched\n";
     SensorManager SM;
+    float[] ACC_DATA=new float[3];
+    float[] GYR_DATA=new float[3];
+    float[] GRA_DATA=new float[3];
 
     public static final String ACTION_SENSOR_BROADCAST = SensorService.class.getName() + "SensorBroadcast";
 
@@ -93,7 +96,7 @@ public class SensorService extends Service implements SensorEventListener
 
 
 
-        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
         SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
         SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_NORMAL);
 
@@ -157,7 +160,8 @@ public class SensorService extends Service implements SensorEventListener
     private void sendBroadcastMessage(SensorEvent se) {
         if (se != null) {
             Intent intent = new Intent(ACTION_SENSOR_BROADCAST);
-            float[] entries = new float[9];
+            //float[] entries = new float[9];
+
             float timestep = 0;
 
             switch(se.sensor.getType()){
@@ -166,9 +170,11 @@ public class SensorService extends Service implements SensorEventListener
                     text_acc += "X = " + se.values[0] + "\n";
                     text_acc += "Y = " + se.values[1] + "\n";
                     text_acc += "Z = " + se.values[2] + "\n";
-                    entries[0]=se.values[0];
-                    entries[1]=se.values[1];
-                    entries[2]=se.values[2];
+                    ACC_DATA[0] = se.values[0];
+                    ACC_DATA[1] = se.values[1];
+                    ACC_DATA[2] = se.values[2];
+
+                    Log.d("ACC", String.valueOf(se.values[0])+", "+String.valueOf(se.values[1])+", "+String.valueOf(se.values[2]));
 
 
                     //Change the text of notification to accelerometer using setContetnText
@@ -180,9 +186,9 @@ public class SensorService extends Service implements SensorEventListener
                     text_gyr += "X = " + se.values[0] + "\n";
                     text_gyr += "Y = " + se.values[1] + "\n";
                     text_gyr += "Z = " + se.values[2] + "\n";
-                    entries[3]=se.values[0];
-                    entries[4]=se.values[1];
-                    entries[5]=se.values[2];
+                    GYR_DATA[0] = se.values[0];
+                    GYR_DATA[1] = se.values[1];
+                    GYR_DATA[2] = se.values[2];
                     timestep = se.timestamp;
 
 
@@ -191,16 +197,30 @@ public class SensorService extends Service implements SensorEventListener
                     text_gra += "X = " + se.values[0] + "\n";
                     text_gra += "Y = " + se.values[1] + "\n";
                     text_gra += "Z = " + se.values[2] + "\n";
-                    entries[6]=se.values[0];
-                    entries[7]=se.values[1];
-                    entries[8]=se.values[2];
+                    GRA_DATA[0] = se.values[0];
+                    GRA_DATA[1] = se.values[1];
+                    GRA_DATA[2] = se.values[2];
 
 
             }
+            Log.d("SEN", String.valueOf(ACC_DATA[0])+", "
+                    +String.valueOf(ACC_DATA[1])+", "
+                    +String.valueOf(ACC_DATA[2])+", "
+                    +String.valueOf(GYR_DATA[0])+", "
+                    +String.valueOf(GYR_DATA[1])+", "
+                    +String.valueOf(GYR_DATA[2])+", "
+                    +String.valueOf(GRA_DATA[0])+", "
+                    +String.valueOf(GRA_DATA[1])+", "
+                    +String.valueOf(GRA_DATA[2])
+                    );
+            Log.d("ACC_DATA", String.valueOf(ACC_DATA[0])+", "+String.valueOf(ACC_DATA[1])+", "+String.valueOf(ACC_DATA[2])+", ");
             intent.putExtra("ACC", text_acc);
             intent.putExtra("GYR", text_gyr);
             intent.putExtra("GRA", text_gra);
-            intent.putExtra("SEN",entries);
+
+            intent.putExtra("ACC_DATA", ACC_DATA);
+            intent.putExtra("GYR_DATA", GYR_DATA);
+            intent.putExtra("GRA_DATA", GRA_DATA);
             intent.putExtra("TIME",timestep);
 
 

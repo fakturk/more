@@ -1,7 +1,6 @@
 package com.unist.netlab.fakturk.more;
 
 import android.hardware.SensorManager;
-import android.util.Log;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -17,26 +16,64 @@ public class Move
     //SensorEvent se;
     TextView tv;
     TextView tvMain;
+    TextView tvAngle;
     RelativeLayout root;
-    float[] events =new float[9];;
+    //float[] events =new float[9];;
+    float[] ACC_DATA, GYR_DATA, GRA_DATA;
+    
     float timestamp;
 
-    public Move(float[] e, float timestamp, TextView tv, TextView tvMain, RelativeLayout root)
+    public Move(float[] ACC_DATA,float[] GYR_DATA,float[] GRA_DATA, float timestamp, TextView tv, TextView tvMain, TextView tvAngle, RelativeLayout root)
     {
         //this.se = se;
         this.tv = tv;
 
         this.tvMain = tvMain;
+        this.tvAngle = tvAngle;
+
         this.root = root;
         this.timestamp = timestamp;
+        this.ACC_DATA = new float[3];
+        this.GYR_DATA = new float[3];
+        this.GRA_DATA = new float[3];
+
        // events
-        for (int i=0;i<8;i++)
+        for (int i=0;i<3;i++)
         {
-            Log.d("eventAtama", Float.toString(e[i]));
-            this.events[i]=e[i];
+            //Log.d("eventAtama", Float.toString(e[i]));
+            this.ACC_DATA[i]=ACC_DATA[i];
+            this.GYR_DATA[i]=GYR_DATA[i];
+            this.GRA_DATA[i]=GRA_DATA[i];
         }
     }
 
+    public void rotateText()
+    {
+        float[] g = new float[3];
+        g[0] = ACC_DATA[0];
+        g[1] = ACC_DATA[1];
+        g[2] = ACC_DATA[2];
+
+        double norm_Of_g = Math.sqrt(g[0] * g[0] + g[1] * g[1] + g[2] * g[2]);
+
+// Normalize the accelerometer vector
+        g[0] = (float) (g[0] / norm_Of_g);
+        g[1] = (float) (g[1] / norm_Of_g);
+        g[2] = (float) (g[2] / norm_Of_g);
+
+        int inclination = (int) Math.round(Math.toDegrees(Math.acos(g[2])));
+        int rotation = (int) Math.round(Math.toDegrees(Math.atan2(g[0], g[1])));
+        //int angle = (int) (Math.round((180/Math.PI)*Math.acos(g[1])))-90;
+
+        //tvAngle.setText("Inclination : "+inclination+"\n Rotation : "+rotation);
+        //tvAngle.setText(g[0]+", "+g[1]+", "+g[2]);
+        tvAngle.setText("Inclination : "+inclination+",\n Rotation : "+rotation );
+        tvMain.setRotation(rotation);
+
+
+
+
+    }
     public void moveIt()
     {
 
@@ -50,6 +87,8 @@ public class Move
         int right = root.getRight();
         int height = tvMain.getHeight();
         int width = tvMain.getWidth();
+
+
 
 
 //        if (se.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -69,14 +108,16 @@ public class Move
             final float alpha = (float) 0.8;
 
             float[] gravity = new float[3];
-            gravity[0] = alpha * gravity[0] + (1 - alpha) * events[0];
-            gravity[1] = alpha * gravity[1] + (1 - alpha) * events[1];
-            gravity[2] = alpha * gravity[2] + (1 - alpha) * events[2];
+            gravity[0] = alpha * gravity[0] + (1 - alpha) * ACC_DATA[0];
+            gravity[1] = alpha * gravity[1] + (1 - alpha) * ACC_DATA[1];
+            gravity[2] = alpha * gravity[2] + (1 - alpha) * ACC_DATA[2];
 
             float[] linear_acceleration = new float[3];
-            linear_acceleration[0] = events[0] - gravity[0];
-            linear_acceleration[1] = events[1] - gravity[1];
-            linear_acceleration[2] = events[2] - gravity[2];
+            linear_acceleration[0] = ACC_DATA[0] - gravity[0];
+            linear_acceleration[1] = ACC_DATA[1] - gravity[1];
+            linear_acceleration[2] = ACC_DATA[2] - gravity[2];
+
+        tvAngle.setText(Float.toString(ACC_DATA[0]));
 
 
             // tvMain.setLayoutParams(layoutParams);
@@ -127,9 +168,9 @@ public class Move
             if (tStamp != 0) {
                 final float dT = (timestamp - tStamp) * NS2S;
                 // Axis of the rotation sample, not normalized yet.
-                float axisX = events[3];
-                float axisY = events[4];
-                float axisZ = events[5];
+                float axisX = GYR_DATA[0];
+                float axisY = GYR_DATA[1];
+                float axisZ = GYR_DATA[2];
 
                 // Calculate the angular speed of the sample
                 float omegaMagnitude = sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
@@ -167,24 +208,24 @@ public class Move
             //tvMain.setX(originalWidth*2);
             //tvMain.setY(originalHeight*2);
 
-            if (tvMain.getX() - events[4] +events[5]> left) {
-                smoothMove('x', tvMain.getX(), (-events[4] + events[5]));
-            } else if (tvMain.getX() - events[4] +events[5] <= left) {
+            if (tvMain.getX() - GYR_DATA[1] +GYR_DATA[2]> left) {
+                smoothMove('x', tvMain.getX(), (-GYR_DATA[1] + GYR_DATA[2]));
+            } else if (tvMain.getX() - GYR_DATA[1] +GYR_DATA[2] <= left) {
                 tvMain.setX(left);
             }
-            if (tvMain.getX() + width - events[4] +events[5] < right) {
-                smoothMove('x', tvMain.getX(), (-events[4] + events[5]));
-            } else if (tvMain.getX() + width - events[4] +events[5] >= right) {
+            if (tvMain.getX() + width - GYR_DATA[1] +GYR_DATA[2] < right) {
+                smoothMove('x', tvMain.getX(), (-GYR_DATA[1] + GYR_DATA[2]));
+            } else if (tvMain.getX() + width - GYR_DATA[1] +GYR_DATA[2] >= right) {
                 tvMain.setX(right - width);
             }
-            if ((tvMain.getY() - (events[3]  +events[5])) > top) {
-                smoothMove('y', tvMain.getY(), -(events[3] + events[5]));
-            } else if ((tvMain.getY() - (events[3]  +events[5])) <= top) {
+            if ((tvMain.getY() - (GYR_DATA[0]  +GYR_DATA[2])) > top) {
+                smoothMove('y', tvMain.getY(), -(GYR_DATA[0] + GYR_DATA[2]));
+            } else if ((tvMain.getY() - (GYR_DATA[0]  +GYR_DATA[2])) <= top) {
                 tvMain.setY(top);
             }
-            if ((tvMain.getY() + height - (events[3]  +events[5])) < bottom) {
-                smoothMove('y', tvMain.getY(), -(events[3] + events[5]));
-            } else if ((tvMain.getY() + height - (events[3] +events[5] )) >= bottom) {
+            if ((tvMain.getY() + height - (GYR_DATA[0]  +GYR_DATA[2])) < bottom) {
+                smoothMove('y', tvMain.getY(), -(GYR_DATA[0] + GYR_DATA[2]));
+            } else if ((tvMain.getY() + height - (GYR_DATA[0] +GYR_DATA[2] )) >= bottom) {
                 tvMain.setY(bottom - height);
             }
 

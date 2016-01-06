@@ -24,8 +24,10 @@ public class MainActivity extends Activity
     //SensorManager SM;
     TextView tv;
     TextView tvMain;
+    TextView tvAngle;
     Button buttonUp, buttonDown;
     Move move;
+    DisplayChange displayChange;
 
 
     RelativeLayout root;
@@ -61,8 +63,12 @@ public class MainActivity extends Activity
         tv = (TextView)  findViewById(R.id.textView);
 
         tvMain = (TextView) findViewById(R.id.textViewMain);
+        tvAngle = (TextView) findViewById(R.id.textViewAngle);
         buttonUp = (Button) findViewById(R.id.buttonSizeUp);
         buttonDown = (Button) findViewById(R.id.buttonSizeDown);
+        displayChange = new DisplayChange(tv, tvAngle);
+
+
 
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
@@ -70,14 +76,13 @@ public class MainActivity extends Activity
                     @Override
                     public void onReceive(Context context, Intent intent) {
 
-                        tv.setText("ACC : \n"+intent.getStringExtra("ACC")+
-                                        "\n"+
-                                "GYR : \n"+intent.getStringExtra("GYR")+
-                                         "\n"+
-                                "GRA : \n"+intent.getStringExtra("GRA"));
 
-                        move = new Move(intent.getFloatArrayExtra("SEN"), intent.getFloatExtra("TIME",0),  tv,   tvMain,  root);
-                        move.moveIt();
+                        displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"), intent.getStringExtra("GRA"));
+                        //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), intent.getFloatArrayExtra("GRA_DATA"));
+
+                        move = new Move(intent.getFloatArrayExtra("ACC_DATA"),intent.getFloatArrayExtra("GYR_DATA"),intent.getFloatArrayExtra("GRA_DATA"), intent.getFloatExtra("TIME",0),  tv,   tvMain, tvAngle, root);
+                        //move.moveIt();
+                        move.rotateText();
 
                     }
                 }, new IntentFilter(SensorService.ACTION_SENSOR_BROADCAST)
@@ -174,17 +179,11 @@ public class MainActivity extends Activity
 
         super.onDestroy();
     }
-}
- class MyReceiver extends BroadcastReceiver{
-    static final String Log_Tag = "MyReceiver";
-    @Override
-    public void onReceive(Context arg0, Intent arg1){
-       // Log.d(LOG_TAG, "onReceive");
-        String measurement = arg1.getStringExtra("measurement");
-        System.out.println("I am here");
-    }
+
+
 
 }
+
 
 
 
