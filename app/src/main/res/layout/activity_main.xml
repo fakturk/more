@@ -48,6 +48,6 @@
         android:layout_alignParentEnd="true"
         android:layout_alignBottom="@+id/buttonSizeDown"
         android:layout_toEndOf="@+id/textViewMain"
-        android:layout_alignTop="@+id/buttonSizeUp"/>
+        />
 
 </RelativeLayout>

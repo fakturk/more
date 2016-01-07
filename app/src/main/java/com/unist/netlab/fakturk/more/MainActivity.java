@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +29,12 @@ public class MainActivity extends Activity
     Button buttonUp, buttonDown;
     Move move;
     DisplayChange displayChange;
+    Display mdisp;
+    Double alpha;
+
+
+
+
 
 
     RelativeLayout root;
@@ -67,6 +74,8 @@ public class MainActivity extends Activity
         buttonUp = (Button) findViewById(R.id.buttonSizeUp);
         buttonDown = (Button) findViewById(R.id.buttonSizeDown);
         displayChange = new DisplayChange(tv, tvAngle);
+        mdisp = getWindowManager().getDefaultDisplay();
+        alpha = 0.0;
 
 
 
@@ -82,7 +91,8 @@ public class MainActivity extends Activity
 
                         move = new Move(intent.getFloatArrayExtra("ACC_DATA"),intent.getFloatArrayExtra("GYR_DATA"),intent.getFloatArrayExtra("GRA_DATA"), intent.getFloatExtra("TIME",0),  tv,   tvMain, tvAngle, root);
                         //move.moveIt();
-                        move.rotateText();
+
+                        alpha = move.rotateText(mdisp, alpha);
 
                     }
                 }, new IntentFilter(SensorService.ACTION_SENSOR_BROADCAST)
