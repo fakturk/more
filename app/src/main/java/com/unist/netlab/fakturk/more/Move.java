@@ -1,6 +1,8 @@
 package com.unist.netlab.fakturk.more;
 
+import android.graphics.Point;
 import android.hardware.SensorManager;
+import android.view.Display;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -22,6 +24,10 @@ public class Move
     float[] ACC_DATA, GYR_DATA, GRA_DATA;
     
     float timestamp;
+    int maxX, maxY;
+    float x,y, new_x, new_y;
+    double r;
+    double  beta=0;//angles, beta is the current angle and alpha is the change
 
     public Move(float[] ACC_DATA,float[] GYR_DATA,float[] GRA_DATA, float timestamp, TextView tv, TextView tvMain, TextView tvAngle, RelativeLayout root)
     {
@@ -47,7 +53,7 @@ public class Move
         }
     }
 
-    public void rotateText()
+    public double rotateText(Display mdisp, double alpha)
     {
         float[] g = new float[3];
         g[0] = ACC_DATA[0];
@@ -67,12 +73,67 @@ public class Move
 
         //tvAngle.setText("Inclination : "+inclination+"\n Rotation : "+rotation);
         //tvAngle.setText(g[0]+", "+g[1]+", "+g[2]);
-        tvAngle.setText("Inclination : "+inclination+",\n Rotation : "+rotation );
+
+
+
+
+
+        x = tvMain.getX();
+        y = tvMain.getY();
+        Point size = new Point();
+        mdisp.getSize(size);
+        maxX = size.x;
+        maxY = size.y;
+
+        r = Math.sqrt(Math.pow((maxX-x),2)+Math.pow((maxY-y),2));
+
+        beta = Math.toDegrees(Math.asin((maxX-x)/r));
+        alpha = rotation-alpha;
+        new_x = (float) (maxX- Math.sin(Math.toRadians(beta+rotation))*r);
+        new_y = (float) (maxY - Math.cos(Math.toRadians(beta+rotation))*r);
+//        if (new_x<0)
+//        {
+//            new_x = 0;
+//        }
+//        if (new_y<0)
+//        {
+//            new_y=0;
+//        }
+//        if (new_x>maxX);
+//        {
+//            new_x=maxX;
+//        }
+//        if (new_y>maxY)
+//        {
+//            new_y = maxY;
+//        }
+
+
+
         tvMain.setRotation(rotation);
+        tvMain.setX(new_x);
+        tvMain.setY(new_y);
+
+        tvAngle.setText("Inclination : "+inclination
+                +",\n Rotation : "+rotation
+                + "\n r :"+r
+                + "\n alpha :"+alpha
+                + "\n beta :"+beta
+                + "\n alpha + beta :"+(alpha+beta)
+                + "\n x :"+x
+                + "\n y :"+y
+                + "\n Y - y :"+(maxY - y)
+                + "\n cos beta :"+Math.cos(Math.toRadians(beta))
+                + "\n cos beta * r :"+(Math.cos(Math.toRadians(beta))*r)
+                + "\n new_x :"+new_x
+                + "\n new_y :"+new_y
+                + "\n maxX :"+maxX
+                + "\n maxY :"+maxY);
 
 
 
 
+        return alpha;
     }
     public void moveIt()
     {
