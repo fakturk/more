@@ -21,15 +21,15 @@ public class Move
     TextView tvAngle;
     RelativeLayout root;
     //float[] events =new float[9];;
-    float[] ACC_DATA, GYR_DATA, GRA_DATA;
+    float[] ACC_DATA, GYR_DATA;
     
     float timestamp;
     int maxX, maxY;
     float x,y, new_x, new_y;
     double r;
-    double  beta=0;//angles, beta is the current angle and alpha is the change
+    double  beta=0, betaR;//angles, beta is the current angle and alpha is the change
 
-    public Move(float[] ACC_DATA,float[] GYR_DATA,float[] GRA_DATA, float timestamp, TextView tv, TextView tvMain, TextView tvAngle, RelativeLayout root)
+    public Move(float[] ACC_DATA,float[] GYR_DATA, float timestamp, TextView tv, TextView tvMain, TextView tvAngle, RelativeLayout root)
     {
         //this.se = se;
         this.tv = tv;
@@ -41,7 +41,7 @@ public class Move
         this.timestamp = timestamp;
         this.ACC_DATA = new float[3];
         this.GYR_DATA = new float[3];
-        this.GRA_DATA = new float[3];
+//        this.GRA_DATA = new float[3];
 
        // events
         for (int i=0;i<3;i++)
@@ -49,12 +49,13 @@ public class Move
             //Log.d("eventAtama", Float.toString(e[i]));
             this.ACC_DATA[i]=ACC_DATA[i];
             this.GYR_DATA[i]=GYR_DATA[i];
-            this.GRA_DATA[i]=GRA_DATA[i];
+//            this.GRA_DATA[i]=GRA_DATA[i];
         }
     }
 
-    public double rotateText(Display mdisp, double alpha)
+    public double rotateText(Display mdisp, double oldRotation)
     {
+        double alpha; //difference between currrent and old rotation angle
         float[] g = new float[3];
         g[0] = ACC_DATA[0];
         g[1] = ACC_DATA[1];
@@ -78,8 +79,10 @@ public class Move
 
 
 
-        x = tvMain.getX();
-        y = tvMain.getY();
+//        x = tvMain.getX();
+//        y = tvMain.getY();
+        x = 276;
+        y = 530;
         Point size = new Point();
         mdisp.getSize(size);
         maxX = size.x;
@@ -87,10 +90,12 @@ public class Move
 
         r = Math.sqrt(Math.pow((maxX-x),2)+Math.pow((maxY-y),2));
 
-        beta = Math.toDegrees(Math.asin((maxX-x)/r));
-        alpha = rotation-alpha;
-        new_x = (float) (maxX- Math.sin(Math.toRadians(beta+rotation))*r);
-        new_y = (float) (maxY - Math.cos(Math.toRadians(beta+rotation))*r);
+        betaR = Math.acos((maxX-x)/r);
+        beta = Math.toDegrees(Math.acos((maxX-x)/r));
+        alpha = rotation-oldRotation;
+//        alpha = 20;
+        new_x = (float) (maxX- Math.cos(Math.toRadians(beta+alpha))*r);
+        new_y = (float) (maxY - Math.sin(Math.toRadians(beta+alpha))*r);
 //        if (new_x<0)
 //        {
 //            new_x = 0;
@@ -119,6 +124,7 @@ public class Move
                 + "\n r :"+r
                 + "\n alpha :"+alpha
                 + "\n beta :"+beta
+                + "\n betaR :"+betaR
                 + "\n alpha + beta :"+(alpha+beta)
                 + "\n x :"+x
                 + "\n y :"+y
@@ -133,7 +139,7 @@ public class Move
 
 
 
-        return alpha;
+        return oldRotation;
     }
     public void moveIt()
     {

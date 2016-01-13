@@ -29,7 +29,7 @@ public class SensorService extends Service implements SensorEventListener
     SensorManager SM;
     float[] ACC_DATA=new float[3];
     float[] GYR_DATA=new float[3];
-    float[] GRA_DATA=new float[3];
+//    float[] GRA_DATA=new float[3];
 
     public static final String ACTION_SENSOR_BROADCAST = SensorService.class.getName() + "SensorBroadcast";
 
@@ -98,7 +98,7 @@ public class SensorService extends Service implements SensorEventListener
 
         SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
         SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
-        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_NORMAL);
+       // SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_NORMAL);
 
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Intent bIntent = new Intent(SensorService.this, MainActivity.class);
@@ -192,14 +192,14 @@ public class SensorService extends Service implements SensorEventListener
                     timestep = se.timestamp;
 
 
-                case Sensor.TYPE_GRAVITY :
-                    text_gra = "";
-                    text_gra += "X = " + se.values[0] + "\n";
-                    text_gra += "Y = " + se.values[1] + "\n";
-                    text_gra += "Z = " + se.values[2] + "\n";
-                    GRA_DATA[0] = se.values[0];
-                    GRA_DATA[1] = se.values[1];
-                    GRA_DATA[2] = se.values[2];
+//                case Sensor.TYPE_GRAVITY :
+//                    text_gra = "";
+//                    text_gra += "X = " + se.values[0] + "\n";
+//                    text_gra += "Y = " + se.values[1] + "\n";
+//                    text_gra += "Z = " + se.values[2] + "\n";
+//                    GRA_DATA[0] = se.values[0];
+//                    GRA_DATA[1] = se.values[1];
+//                    GRA_DATA[2] = se.values[2];
 
 
             }
@@ -209,18 +209,18 @@ public class SensorService extends Service implements SensorEventListener
                     +String.valueOf(GYR_DATA[0])+", "
                     +String.valueOf(GYR_DATA[1])+", "
                     +String.valueOf(GYR_DATA[2])+", "
-                    +String.valueOf(GRA_DATA[0])+", "
-                    +String.valueOf(GRA_DATA[1])+", "
-                    +String.valueOf(GRA_DATA[2])
+//                    +String.valueOf(GRA_DATA[0])+", "
+//                    +String.valueOf(GRA_DATA[1])+", "
+//                    +String.valueOf(GRA_DATA[2])
                     );
             Log.d("ACC_DATA", String.valueOf(ACC_DATA[0])+", "+String.valueOf(ACC_DATA[1])+", "+String.valueOf(ACC_DATA[2])+", ");
             intent.putExtra("ACC", text_acc);
             intent.putExtra("GYR", text_gyr);
-            intent.putExtra("GRA", text_gra);
+//            intent.putExtra("GRA", text_gra);
 
             intent.putExtra("ACC_DATA", ACC_DATA);
             intent.putExtra("GYR_DATA", GYR_DATA);
-            intent.putExtra("GRA_DATA", GRA_DATA);
+//            intent.putExtra("GRA_DATA", GRA_DATA);
             intent.putExtra("TIME",timestep);
 
 

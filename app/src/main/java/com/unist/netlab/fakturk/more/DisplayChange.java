@@ -19,17 +19,15 @@ public class DisplayChange
         this.tvAngle = tvAngle;
     }
 
-    void setDisplay(String ACC, String GYR, String GRA)
+    void setDisplay(String ACC, String GYR)
     {
 
         tv.setText("ACC : \n"+ACC+
                 "\n"+
-                "GYR : \n"+GYR+
-                "\n"+
-                "GRA : \n"+GRA);
+                "GYR : \n"+GYR);
     }
 
-    void setTvAngle(float[] ACC, float[] GYR, float[] GRA)
+    void setTvAngle(float[] ACC, float[] GYR)
     {
 
         tvAngle.setText(String.valueOf(ACC[0])+", "+

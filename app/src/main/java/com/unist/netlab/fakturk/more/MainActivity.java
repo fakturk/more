@@ -86,10 +86,10 @@ public class MainActivity extends Activity
                     public void onReceive(Context context, Intent intent) {
 
 
-                        displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"), intent.getStringExtra("GRA"));
-                        //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), intent.getFloatArrayExtra("GRA_DATA"));
+                        displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"));
+                        //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
 
-                        move = new Move(intent.getFloatArrayExtra("ACC_DATA"),intent.getFloatArrayExtra("GYR_DATA"),intent.getFloatArrayExtra("GRA_DATA"), intent.getFloatExtra("TIME",0),  tv,   tvMain, tvAngle, root);
+                        move = new Move(intent.getFloatArrayExtra("ACC_DATA"),intent.getFloatArrayExtra("GYR_DATA"), intent.getFloatExtra("TIME",0),  tv,   tvMain, tvAngle, root);
                         //move.moveIt();
 
                         alpha = move.rotateText(mdisp, alpha);
