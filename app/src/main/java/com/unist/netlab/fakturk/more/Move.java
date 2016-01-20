@@ -22,7 +22,8 @@ public class Move
     RelativeLayout root;
     //float[] events =new float[9];;
     float[] ACC_DATA, GYR_DATA;
-    
+
+
     float timestamp;
     int maxX, maxY;
     float x,y, new_x, new_y;
@@ -43,6 +44,8 @@ public class Move
         this.GYR_DATA = new float[3];
 //        this.GRA_DATA = new float[3];
 
+
+
        // events
         for (int i=0;i<3;i++)
         {
@@ -51,6 +54,54 @@ public class Move
             this.GYR_DATA[i]=GYR_DATA[i];
 //            this.GRA_DATA[i]=GRA_DATA[i];
         }
+    }
+
+    public float[] lyingMove(Display mdisp, float oldAccX, float oldVelocity)
+    {
+        final float alpha = (float) 0.8;
+        float  velocity, distanceX;
+
+        float[] gravity = new float[3];
+        gravity[0] = alpha * gravity[0] + (1 - alpha) * ACC_DATA[0];
+        gravity[1] = alpha * gravity[1] + (1 - alpha) * ACC_DATA[1];
+        gravity[2] = alpha * gravity[2] + (1 - alpha) * ACC_DATA[2];
+
+        float[] linear_acceleration = new float[3];
+        linear_acceleration[0] = ACC_DATA[0] - gravity[0];
+        linear_acceleration[1] = ACC_DATA[1] - gravity[1];
+        linear_acceleration[2] = ACC_DATA[2] - gravity[2];
+
+        x = 276;
+        y = 530;
+        Point size = new Point();
+        mdisp.getSize(size);
+        maxX = size.x;
+        maxY = size.y;
+
+//        if (ACC_DATA[0]>0.1||ACC_DATA[0]<-0.1)
+//        {
+//            new_x = oldAccX + ACC_DATA[0];
+//        }
+//        else new_x = oldAccX;
+        velocity = oldAccX + ACC_DATA[0];
+        distanceX = oldVelocity+velocity;
+        new_x = x+distanceX;
+        new_y = y;
+        tvMain.setX(new_x);
+        tvMain.setY(new_y);
+        oldAccX = velocity;
+
+        tvAngle.setText("Velocity : "+velocity
+                +",\n distanceX : "+distanceX
+                + "\n new_x :"+new_x
+                + "\n linear x :"+linear_acceleration[0]
+                + "\n linear y :"+linear_acceleration[1]
+                + "\n linear z :"+linear_acceleration[2]
+               );
+
+        return new float[]{velocity, distanceX};
+
+
     }
 
     public double rotateText(Display mdisp, double oldRotation)
@@ -94,8 +145,11 @@ public class Move
         beta = Math.toDegrees(Math.acos((maxX-x)/r));
         alpha = rotation-oldRotation;
 //        alpha = 20;
-        new_x = (float) (maxX- Math.cos(Math.toRadians(beta+alpha))*r);
-        new_y = (float) (maxY - Math.sin(Math.toRadians(beta+alpha))*r);
+//        new_x = (float) (maxX- Math.cos(Math.toRadians(beta+alpha))*r);
+//        new_y = (float) (maxY - Math.sin(Math.toRadians(beta+alpha))*r);
+
+        new_x = x;
+        new_y = y;
 //        if (new_x<0)
 //        {
 //            new_x = 0;

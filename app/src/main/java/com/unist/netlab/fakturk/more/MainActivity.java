@@ -31,6 +31,8 @@ public class MainActivity extends Activity
     DisplayChange displayChange;
     Display mdisp;
     Double alpha;
+    float oldAccX, oldVelocity;
+
 
 
 
@@ -76,6 +78,9 @@ public class MainActivity extends Activity
         displayChange = new DisplayChange(tv, tvAngle);
         mdisp = getWindowManager().getDefaultDisplay();
         alpha = 0.0;
+        oldAccX = (float) 0.0;
+        oldVelocity = (float) 0.0;
+
 
 
 
@@ -92,7 +97,11 @@ public class MainActivity extends Activity
                         move = new Move(intent.getFloatArrayExtra("ACC_DATA"),intent.getFloatArrayExtra("GYR_DATA"), intent.getFloatExtra("TIME",0),  tv,   tvMain, tvAngle, root);
                         //move.moveIt();
 
-                        alpha = move.rotateText(mdisp, alpha);
+                       // alpha = move.rotateText(mdisp, alpha);
+                         float[] temp;
+                        temp = move.lyingMove(mdisp, oldAccX, oldVelocity);
+                        oldAccX = temp[0];
+                        oldVelocity = temp[1];
 
                     }
                 }, new IntentFilter(SensorService.ACTION_SENSOR_BROADCAST)
