@@ -2,6 +2,8 @@ package com.unist.netlab.fakturk.more;
 
 import android.graphics.Point;
 import android.hardware.SensorManager;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Display;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -21,16 +23,19 @@ public class Move
     TextView tvAngle;
     RelativeLayout root;
     //float[] events =new float[9];;
-    float[] ACC_DATA, GYR_DATA;
+    float[] ACC_DATA, GYR_DATA, ACC_DATA_LPF;
+    float accX=0.0f;
+    float factor = 0.02f;
 
 
-    float timestamp;
+    long timestamp;
     int maxX, maxY;
     float x,y, new_x, new_y;
     double r;
     double  beta=0, betaR;//angles, beta is the current angle and alpha is the change
+    Display display;
 
-    public Move(float[] ACC_DATA,float[] GYR_DATA, float timestamp, TextView tv, TextView tvMain, TextView tvAngle, RelativeLayout root)
+    public Move(float[] ACC_DATA, float[] GYR_DATA, long timestamp, Display mdisp, TextView tv, TextView tvMain, TextView tvAngle, RelativeLayout root)
     {
         //this.se = se;
         this.tv = tv;
@@ -40,6 +45,8 @@ public class Move
 
         this.root = root;
         this.timestamp = timestamp;
+
+        this.display = mdisp;
         this.ACC_DATA = new float[3];
         this.GYR_DATA = new float[3];
 //        this.GRA_DATA = new float[3];
@@ -56,7 +63,7 @@ public class Move
         }
     }
 
-    public float[] lyingMove(Display mdisp, float oldAccX, float oldVelocity)
+    public float[] lyingMove(Display mdisp, float oldVelocity, float oldDistance)
     {
         final float alpha = (float) 0.8;
         float  velocity, distanceX;
@@ -71,6 +78,8 @@ public class Move
         linear_acceleration[1] = ACC_DATA[1] - gravity[1];
         linear_acceleration[2] = ACC_DATA[2] - gravity[2];
 
+        float dt = (System.nanoTime() - timestamp) / 1000000000.0f;
+
         x = 276;
         y = 530;
         Point size = new Point();
@@ -78,18 +87,29 @@ public class Move
         maxX = size.x;
         maxY = size.y;
 
-//        if (ACC_DATA[0]>0.1||ACC_DATA[0]<-0.1)
+       // accX = accX *(1-factor) + factor*ACC_DATA[0];
+
+//        if (ACC_DATA[0]>0.2||ACC_DATA[0]<-0.2)
 //        {
-//            new_x = oldAccX + ACC_DATA[0];
+//            velocity = oldVelocity + ACC_DATA[0]*dt;
 //        }
-//        else new_x = oldAccX;
-        velocity = oldAccX + ACC_DATA[0];
-        distanceX = oldVelocity+velocity;
-        new_x = x+distanceX;
+//        else velocity = oldVelocity;
+
+        ACC_DATA_LPF = lowPass(ACC_DATA.clone(),ACC_DATA_LPF);
+
+        velocity = oldVelocity + ACC_DATA_LPF[0]*dt;
+        distanceX = oldDistance+velocity*dt;
+
+        DisplayMetrics dm = new DisplayMetrics();
+        mdisp.getMetrics(dm);
+
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, distanceX*1000,
+                dm);
+        new_x = x-px;
         new_y = y;
         tvMain.setX(new_x);
         tvMain.setY(new_y);
-        oldAccX = velocity;
+        oldVelocity = velocity;
 
         tvAngle.setText("Velocity : "+velocity
                 +",\n distanceX : "+distanceX
@@ -102,6 +122,14 @@ public class Move
         return new float[]{velocity, distanceX};
 
 
+    }
+
+    protected float[] lowPass( float[] input, float[] output ) {
+        if ( output == null ) return input;
+        for ( int i=0; i<input.length; i++ ) {
+            output[i] = output[i] + factor * (input[i] - output[i]);
+        }
+        return output;
     }
 
     public double rotateText(Display mdisp, double oldRotation)

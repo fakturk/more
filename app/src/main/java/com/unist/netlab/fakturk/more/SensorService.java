@@ -35,6 +35,8 @@ public class SensorService extends Service implements SensorEventListener
 
     static final String LOG_TAG = "SimpleService";
 
+    long mSensorTimeStamp;
+
 //    Intent intent = new Intent(SensorService.this, MainActivity.class);
 //    NotificationCompat.Builder mCompatBuilder;
 //    NotificationManager nm;
@@ -162,7 +164,7 @@ public class SensorService extends Service implements SensorEventListener
             Intent intent = new Intent(ACTION_SENSOR_BROADCAST);
             //float[] entries = new float[9];
 
-            float timestep = 0;
+
 
             switch(se.sensor.getType()){
                 case Sensor.TYPE_ACCELEROMETER :
@@ -189,7 +191,7 @@ public class SensorService extends Service implements SensorEventListener
                     GYR_DATA[0] = se.values[0];
                     GYR_DATA[1] = se.values[1];
                     GYR_DATA[2] = se.values[2];
-                    timestep = se.timestamp;
+
 
 
 //                case Sensor.TYPE_GRAVITY :
@@ -203,6 +205,8 @@ public class SensorService extends Service implements SensorEventListener
 
 
             }
+
+
             Log.d("SEN", String.valueOf(ACC_DATA[0])+", "
                     +String.valueOf(ACC_DATA[1])+", "
                     +String.valueOf(ACC_DATA[2])+", "
@@ -214,6 +218,10 @@ public class SensorService extends Service implements SensorEventListener
 //                    +String.valueOf(GRA_DATA[2])
                     );
             Log.d("ACC_DATA", String.valueOf(ACC_DATA[0])+", "+String.valueOf(ACC_DATA[1])+", "+String.valueOf(ACC_DATA[2])+", ");
+
+
+            mSensorTimeStamp = se.timestamp;
+
             intent.putExtra("ACC", text_acc);
             intent.putExtra("GYR", text_gyr);
 //            intent.putExtra("GRA", text_gra);
@@ -221,7 +229,7 @@ public class SensorService extends Service implements SensorEventListener
             intent.putExtra("ACC_DATA", ACC_DATA);
             intent.putExtra("GYR_DATA", GYR_DATA);
 //            intent.putExtra("GRA_DATA", GRA_DATA);
-            intent.putExtra("TIME",timestep);
+            intent.putExtra("TIME",mSensorTimeStamp);
 
 
 //

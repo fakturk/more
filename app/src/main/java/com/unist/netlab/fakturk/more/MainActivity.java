@@ -26,7 +26,7 @@ public class MainActivity extends Activity
     TextView tv;
     TextView tvMain;
     TextView tvAngle;
-    Button buttonUp, buttonDown;
+    Button buttonUp, buttonDown, buttonReset;
     Move move;
     DisplayChange displayChange;
     Display mdisp;
@@ -75,6 +75,7 @@ public class MainActivity extends Activity
         tvAngle = (TextView) findViewById(R.id.textViewAngle);
         buttonUp = (Button) findViewById(R.id.buttonSizeUp);
         buttonDown = (Button) findViewById(R.id.buttonSizeDown);
+        buttonReset = (Button) findViewById(R.id.buttonReset);
         displayChange = new DisplayChange(tv, tvAngle);
         mdisp = getWindowManager().getDefaultDisplay();
         alpha = 0.0;
@@ -94,7 +95,7 @@ public class MainActivity extends Activity
                         displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"));
                         //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
 
-                        move = new Move(intent.getFloatArrayExtra("ACC_DATA"),intent.getFloatArrayExtra("GYR_DATA"), intent.getFloatExtra("TIME",0),  tv,   tvMain, tvAngle, root);
+                        move = new Move(intent.getFloatArrayExtra("ACC_DATA"),intent.getFloatArrayExtra("GYR_DATA"), intent.getLongExtra("TIME",0),mdisp,  tv,   tvMain, tvAngle, root);
                         //move.moveIt();
 
                        // alpha = move.rotateText(mdisp, alpha);
@@ -143,6 +144,18 @@ public class MainActivity extends Activity
                 metrics = getApplicationContext().getResources().getDisplayMetrics();
                 float Textsize = tv.getTextSize() / metrics.density;
                 tvMain.setTextSize(Textsize / 2);
+            }
+        });
+
+        buttonReset.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                oldAccX = 0.0f;
+                oldVelocity = 0.0f;
+                tvMain.setX(276);
+                tvMain.setY(530);
             }
         });
 
