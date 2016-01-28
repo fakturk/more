@@ -27,6 +27,13 @@ public class Move
     float accX=0.0f;
     float factor = 0.02f;
 
+    int top ;
+    int bottom ;
+    int left;
+    int right ;
+    int height ;
+    int width ;
+
 
     long timestamp;
     int maxX, maxY;
@@ -50,6 +57,13 @@ public class Move
         this.ACC_DATA = new float[3];
         this.GYR_DATA = new float[3];
 //        this.GRA_DATA = new float[3];
+
+         top = root.getTop();
+         bottom = root.getBottom();
+         left = root.getLeft();
+         right = root.getRight();
+         height = tvMain.getHeight();
+         width = tvMain.getWidth();
 
 
 
@@ -107,9 +121,24 @@ public class Move
                 dm);
         new_x = x-px;
         new_y = y;
+
+        //oldVelocity = velocity;
+
+        if(new_x<50)
+        {
+            new_x=50;
+            velocity = 0;
+            distanceX = 0;
+        }
+        if (new_x>right-width-50)
+        {
+            new_x = right-width-50;
+            velocity = 0;
+            distanceX = 0;
+        }
+
         tvMain.setX(new_x);
         tvMain.setY(new_y);
-        oldVelocity = velocity;
 
         tvAngle.setText("Velocity : "+velocity
                 +",\n distanceX : "+distanceX
@@ -230,12 +259,7 @@ public class Move
         int originalHeight = tvMain.getHeight();
         int originalWidth = tvMain.getWidth();
 
-        int top = root.getTop();
-        int bottom = root.getBottom();
-        int left = root.getLeft();
-        int right = root.getRight();
-        int height = tvMain.getHeight();
-        int width = tvMain.getWidth();
+       
 
 
 
