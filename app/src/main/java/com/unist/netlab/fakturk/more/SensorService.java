@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Calendar;
 
 
@@ -25,11 +26,12 @@ public class SensorService extends Service implements SensorEventListener
 {
 
 
-    private String text, text_acc="not catched\n", text_gyr="not catched\n", text_gra="not catched\n";
+    private String text, text_acc="not catched\n", text_gyr="not catched\n", text_gra="not catched\n",text_lacc="not catched\n";
     SensorManager SM;
     float[] ACC_DATA=new float[3];
     float[] GYR_DATA=new float[3];
 //    float[] GRA_DATA=new float[3];
+    float[] LACC_DATA=new float[3];
 
     public static final String ACTION_SENSOR_BROADCAST = SensorService.class.getName() + "SensorBroadcast";
 
@@ -83,7 +85,7 @@ public class SensorService extends Service implements SensorEventListener
         SM = (SensorManager)getSystemService(SENSOR_SERVICE);
 
 
-//        FileOutputStream fOut = null;
+        FileOutputStream fOut = null;
 //        try
 //        {
 //            myFile.createNewFile();
@@ -204,6 +206,15 @@ public class SensorService extends Service implements SensorEventListener
 //                    GRA_DATA[2] = se.values[2];
 
 
+                case Sensor.TYPE_LINEAR_ACCELERATION :
+                    text_lacc = "";
+                    text_lacc += "X = " + se.values[0] + "\n";
+                    text_lacc += "Y = " + se.values[1] + "\n";
+                    text_lacc += "Z = " + se.values[2] + "\n";
+                    LACC_DATA[0] = se.values[0];
+                    LACC_DATA[1] = se.values[1];
+                    LACC_DATA[2] = se.values[2];
+
             }
 
 
@@ -223,6 +234,7 @@ public class SensorService extends Service implements SensorEventListener
             mSensorTimeStamp = se.timestamp;
 
             intent.putExtra("ACC", text_acc);
+            intent.putExtra("LACC", text_lacc);
             intent.putExtra("GYR", text_gyr);
 //            intent.putExtra("GRA", text_gra);
 
@@ -230,6 +242,7 @@ public class SensorService extends Service implements SensorEventListener
             intent.putExtra("GYR_DATA", GYR_DATA);
 //            intent.putExtra("GRA_DATA", GRA_DATA);
             intent.putExtra("TIME",mSensorTimeStamp);
+            intent.putExtra("LACC_DATA", LACC_DATA);
 
 
 //

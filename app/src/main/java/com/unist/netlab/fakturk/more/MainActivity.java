@@ -92,7 +92,7 @@ public class MainActivity extends Activity
                     public void onReceive(Context context, Intent intent) {
 
 
-                        displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"));
+                        displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"), intent.getStringExtra("LACC"));
                         //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
 
                         move = new Move(intent.getFloatArrayExtra("ACC_DATA"),intent.getFloatArrayExtra("GYR_DATA"), intent.getLongExtra("TIME",0),mdisp,  tv,   tvMain, tvAngle, root);
