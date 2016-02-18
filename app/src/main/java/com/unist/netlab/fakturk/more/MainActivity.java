@@ -18,6 +18,8 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.Vector;
+
 
 public class MainActivity extends Activity
 {
@@ -32,6 +34,11 @@ public class MainActivity extends Activity
     Display mdisp;
     Double alpha;
     float oldAccX, oldVelocity;
+    int noiseVarianceTimer;
+    double  noiseAverage;
+    double[] noiseVariance;
+    boolean isNoiseVarianceCalculated=false;
+    Vector<float[]> noisyAcc;
 
 
 
@@ -81,6 +88,11 @@ public class MainActivity extends Activity
         alpha = 0.0;
         oldAccX = (float) 0.0;
         oldVelocity = (float) 0.0;
+        noiseVarianceTimer = 100;
+        //noiseVariance=0;
+        noiseAverage=0;
+
+
 
 
 
@@ -95,14 +107,26 @@ public class MainActivity extends Activity
                         displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"), intent.getStringExtra("LACC"));
                         //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
 
-                        move = new Move(intent.getFloatArrayExtra("ACC_DATA"),intent.getFloatArrayExtra("GYR_DATA"), intent.getLongExtra("TIME",0),mdisp,  tv,   tvMain, tvAngle, root);
-                        //move.moveIt();
+                        if (noiseVarianceTimer>0)
+                        {
+                            noisyAcc.add(intent.getFloatArrayExtra("ACC_DATA"));
+                            noiseVarianceTimer--;
+                        }
+                        else
+                        {
+                            if (!isNoiseVarianceCalculated)
+                            {
+                                noiseVariance = calculateNoiseVariance(noisyAcc);
+                            }
+                            move = new Move(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), intent.getLongExtra("TIME", 0), mdisp, tv, tvMain, tvAngle, root);
+                            //move.moveIt();
 
-                       // alpha = move.rotateText(mdisp, alpha);
-                         float[] temp;
-                        temp = move.lyingMove(mdisp, oldAccX, oldVelocity);
-                        oldAccX = temp[0];
-                        oldVelocity = temp[1];
+                            // alpha = move.rotateText(mdisp, alpha);
+                            float[] temp;
+                            temp = move.lyingMove(mdisp, oldAccX, oldVelocity);
+                            oldAccX = temp[0];
+                            oldVelocity = temp[1];
+                        }
 
                     }
                 }, new IntentFilter(SensorService.ACTION_SENSOR_BROADCAST)
@@ -156,10 +180,39 @@ public class MainActivity extends Activity
                 oldVelocity = 0.0f;
                 tvMain.setX(276);
                 tvMain.setY(530);
+                noiseVarianceTimer = 100;
             }
         });
 
 //
+    }
+
+    private double[] calculateNoiseVariance(Vector<float[]> noisyAcc)
+    {
+        double[] variance   = {0, 0, 0};
+        double[] avg        = {0, 0, 0};
+        double[] total      = {0, 0, 0};
+        int sampleSize = noisyAcc.size();
+        for (int i = 0; i < sampleSize; i++)
+        {
+            total[0]+=noisyAcc.get(i)[0];
+            total[1]+=noisyAcc.get(i)[1];
+            total[2]+=noisyAcc.get(i)[2];
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            avg[0] = total[0]/(sampleSize*1.0);
+        }
+        for (int i = 0; i < sampleSize; i++)
+        {
+            variance[0]+=(noisyAcc.get(i)[0]-avg[0]);
+            variance[1]+=(noisyAcc.get(i)[1]-avg[1]);
+            variance[2]+=(noisyAcc.get(i)[2]-avg[2]);
+        }
+
+
+
+        return variance;
     }
 
     @Override
