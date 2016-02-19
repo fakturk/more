@@ -8,6 +8,8 @@ import android.view.Display;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import Jama.Matrix;
+
 import static android.util.FloatMath.cos;
 import static android.util.FloatMath.sin;
 import static android.util.FloatMath.sqrt;
@@ -24,6 +26,7 @@ public class Move
     RelativeLayout root;
     //float[] events =new float[9];;
     float[] ACC_DATA, GYR_DATA, ACC_DATA_LPF;
+    double[][] q;
     float accX=0.0f;
     float factor = 0.02f;
 
@@ -37,12 +40,12 @@ public class Move
 
     long timestamp;
     int maxX, maxY;
-    float x,y, new_x, new_y;
+    float x,y, new_x=276, new_y;
     double r;
     double  beta=0, betaR;//angles, beta is the current angle and alpha is the change
     Display display;
 
-    public Move(float[] ACC_DATA, float[] GYR_DATA, long timestamp, Display mdisp, TextView tv, TextView tvMain, TextView tvAngle, RelativeLayout root)
+    public Move(double[][] q, float[] ACC_DATA, float[] GYR_DATA, long timestamp, Display mdisp, TextView tv, TextView tvMain, TextView tvAngle, RelativeLayout root)
     {
         //this.se = se;
         this.tv = tv;
@@ -52,6 +55,8 @@ public class Move
 
         this.root = root;
         this.timestamp = timestamp;
+
+        this.q = q;
 
         this.display = mdisp;
         this.ACC_DATA = new float[3];
@@ -109,33 +114,40 @@ public class Move
 //        }
 //        else velocity = oldVelocity;
 
-        ACC_DATA_LPF = lowPass(ACC_DATA.clone(),ACC_DATA_LPF);
+       // ACC_DATA_LPF = lowPass(ACC_DATA.clone(),ACC_DATA_LPF);
 
-        velocity = oldVelocity + ACC_DATA_LPF[0]*dt;
-        distanceX = oldDistance+velocity*dt;
+        //velocity = oldVelocity + ACC_DATA_LPF[0]*dt;
+        //distanceX = oldDistance+velocity*dt;
+
+        Kalman kalman = new Kalman(q);
+
+        Matrix X = kalman.filter(dt,ACC_DATA);
+
+        velocity = (float) X.get(3,0);
+        distanceX =oldDistance + (float) X.get(0,0);
 
         DisplayMetrics dm = new DisplayMetrics();
         mdisp.getMetrics(dm);
 
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, distanceX*1000,
                 dm);
-        new_x = x-px;
+        new_x -= px;
         new_y = y;
 
         //oldVelocity = velocity;
 
-        if(new_x<50)
-        {
-            new_x=50;
-            velocity = 0;
-            distanceX = 0;
-        }
-        if (new_x>right-width-50)
-        {
-            new_x = right-width-50;
-            velocity = 0;
-            distanceX = 0;
-        }
+//        if(new_x<50)
+//        {
+//            new_x=50;
+//            velocity = 0;
+//            distanceX = 0;
+//        }
+//        if (new_x>right-width-50)
+//        {
+//            new_x = right-width-50;
+//            velocity = 0;
+//            distanceX = 0;
+//        }
 
         tvMain.setX(new_x);
         tvMain.setY(new_y);
@@ -143,9 +155,9 @@ public class Move
         tvAngle.setText("Velocity : "+velocity
                 +",\n distanceX : "+distanceX
                 + "\n new_x :"+new_x
-                + "\n linear x :"+linear_acceleration[0]
-                + "\n linear y :"+linear_acceleration[1]
-                + "\n linear z :"+linear_acceleration[2]
+                + "\n k x :"+X.get(6,0)
+                + "\n k y :"+X.get(7,0)
+                + "\n k z :"+X.get(8,0)
                );
 
         return new float[]{velocity, distanceX};

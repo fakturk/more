@@ -36,7 +36,7 @@ public class MainActivity extends Activity
     float oldAccX, oldVelocity;
     int noiseVarianceTimer;
     double  noiseAverage;
-    double[] noiseVariance;
+    double[][] noiseVariance;
     boolean isNoiseVarianceCalculated=false;
     Vector<float[]> noisyAcc;
 
@@ -63,7 +63,7 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        Log.d( LOG_TAG, "onCreate" );
+        //Log.d( LOG_TAG, "onCreate" );
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -73,7 +73,7 @@ public class MainActivity extends Activity
 
 
         i= new Intent(this, SensorService.class);
-        Log.d(LOG_TAG, "onCreate/startService");
+      //  Log.d(LOG_TAG, "onCreate/startService");
 
         //SM = (SensorManager) getSystemService(SENSOR_SERVICE);
         tv = (TextView)  findViewById(R.id.textView);
@@ -91,6 +91,8 @@ public class MainActivity extends Activity
         noiseVarianceTimer = 100;
         //noiseVariance=0;
         noiseAverage=0;
+
+        noisyAcc = new Vector<float[]>();
 
 
 
@@ -118,7 +120,7 @@ public class MainActivity extends Activity
                             {
                                 noiseVariance = calculateNoiseVariance(noisyAcc);
                             }
-                            move = new Move(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), intent.getLongExtra("TIME", 0), mdisp, tv, tvMain, tvAngle, root);
+                            move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), intent.getLongExtra("TIME", 0), mdisp, tv, tvMain, tvAngle, root);
                             //move.moveIt();
 
                             // alpha = move.rotateText(mdisp, alpha);
@@ -181,18 +183,20 @@ public class MainActivity extends Activity
                 tvMain.setX(276);
                 tvMain.setY(530);
                 noiseVarianceTimer = 100;
+                noisyAcc.clear();
             }
         });
 
 //
     }
 
-    private double[] calculateNoiseVariance(Vector<float[]> noisyAcc)
+    private double[][] calculateNoiseVariance(Vector<float[]> noisyAcc)
     {
-        double[] variance   = {0, 0, 0};
+        double[][] variance   = {{0, 0, 0},{0,0,0},{0,0,0}};
         double[] avg        = {0, 0, 0};
         double[] total      = {0, 0, 0};
         int sampleSize = noisyAcc.size();
+
         for (int i = 0; i < sampleSize; i++)
         {
             total[0]+=noisyAcc.get(i)[0];
@@ -201,13 +205,25 @@ public class MainActivity extends Activity
         }
         for (int i = 0; i < 3; i++)
         {
-            avg[0] = total[0]/(sampleSize*1.0);
+            avg[i] = total[i]/(sampleSize*1.0);
+            Log.d("avg","avg : "+avg[i]);
         }
-        for (int i = 0; i < sampleSize; i++)
+
+        for (int k = 0; k < sampleSize; k++)
         {
-            variance[0]+=(noisyAcc.get(i)[0]-avg[0]);
-            variance[1]+=(noisyAcc.get(i)[1]-avg[1]);
-            variance[2]+=(noisyAcc.get(i)[2]-avg[2]);
+            for (int i = 0; i < 3; i++)
+            {
+
+                    variance[i][i]+=(noisyAcc.get(k)[i])*(noisyAcc.get(k)[i]);
+                    Log.d("variance","variance "+i+" : "+variance[i][i]+", acc : "+noisyAcc.get(k)[i]+" avg : "+avg[i]);
+
+            }
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+           // if(variance[i][i]==0)
+                variance[i][i]/=sampleSize;
         }
 
 

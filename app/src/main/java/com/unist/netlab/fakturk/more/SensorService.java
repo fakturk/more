@@ -13,7 +13,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
@@ -66,8 +65,8 @@ public class SensorService extends Service implements SensorEventListener
     @Override
     public void onSensorChanged(SensorEvent se)
     {
-        Log.d(LOG_TAG, "onSensorChanged");
-
+//        Log.d(LOG_TAG, "onSensorChanged");
+//
         sendBroadcastMessage(se);
 
     }
@@ -135,7 +134,7 @@ public class SensorService extends Service implements SensorEventListener
     public void onDestroy(){
 
         Toast.makeText(this, "Service Stopped", Toast.LENGTH_LONG).show();
-        Log.d( LOG_TAG, "onDestroy" );
+//        Log.d( LOG_TAG, "onDestroy" );
         SM.unregisterListener(this);
 //        try
 //        {
@@ -178,7 +177,7 @@ public class SensorService extends Service implements SensorEventListener
                     ACC_DATA[1] = se.values[1];
                     ACC_DATA[2] = se.values[2];
 
-                    Log.d("ACC", String.valueOf(se.values[0])+", "+String.valueOf(se.values[1])+", "+String.valueOf(se.values[2]));
+//                    Log.d("ACC", String.valueOf(se.values[0])+", "+String.valueOf(se.values[1])+", "+String.valueOf(se.values[2]));
 
 
                     //Change the text of notification to accelerometer using setContetnText
@@ -218,17 +217,17 @@ public class SensorService extends Service implements SensorEventListener
             }
 
 
-            Log.d("SEN", String.valueOf(ACC_DATA[0])+", "
-                    +String.valueOf(ACC_DATA[1])+", "
-                    +String.valueOf(ACC_DATA[2])+", "
-                    +String.valueOf(GYR_DATA[0])+", "
-                    +String.valueOf(GYR_DATA[1])+", "
-                    +String.valueOf(GYR_DATA[2])+", "
-//                    +String.valueOf(GRA_DATA[0])+", "
-//                    +String.valueOf(GRA_DATA[1])+", "
-//                    +String.valueOf(GRA_DATA[2])
-                    );
-            Log.d("ACC_DATA", String.valueOf(ACC_DATA[0])+", "+String.valueOf(ACC_DATA[1])+", "+String.valueOf(ACC_DATA[2])+", ");
+//            Log.d("SEN", String.valueOf(ACC_DATA[0])+", "
+//                    +String.valueOf(ACC_DATA[1])+", "
+//                    +String.valueOf(ACC_DATA[2])+", "
+//                    +String.valueOf(GYR_DATA[0])+", "
+//                    +String.valueOf(GYR_DATA[1])+", "
+//                    +String.valueOf(GYR_DATA[2])+", "
+////                    +String.valueOf(GRA_DATA[0])+", "
+////                    +String.valueOf(GRA_DATA[1])+", "
+////                    +String.valueOf(GRA_DATA[2])
+//                    );
+//            Log.d("ACC_DATA", String.valueOf(ACC_DATA[0])+", "+String.valueOf(ACC_DATA[1])+", "+String.valueOf(ACC_DATA[2])+", ");
 
 
             mSensorTimeStamp = se.timestamp;
