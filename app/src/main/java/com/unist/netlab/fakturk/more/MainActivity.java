@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -206,7 +205,7 @@ public class MainActivity extends Activity
         for (int i = 0; i < 3; i++)
         {
             avg[i] = total[i]/(sampleSize*1.0);
-            Log.d("avg","avg : "+avg[i]);
+           // Log.d("avg","avg : "+avg[i]);
         }
 
         for (int k = 0; k < sampleSize; k++)
@@ -214,16 +213,29 @@ public class MainActivity extends Activity
             for (int i = 0; i < 3; i++)
             {
 
-                    variance[i][i]+=(noisyAcc.get(k)[i])*(noisyAcc.get(k)[i]);
-                    Log.d("variance","variance "+i+" : "+variance[i][i]+", acc : "+noisyAcc.get(k)[i]+" avg : "+avg[i]);
+                    variance[i][i]+=Math.sqrt((noisyAcc.get(k)[i]-avg[i])*(noisyAcc.get(k)[i]-avg[i]));
+                 //   Log.d("variance","variance "+i+" : "+variance[i][i]+", acc : "+noisyAcc.get(k)[i]+" avg : "+avg[i]);
+
+//                variance[i][i]+=Math.pow(Math.pow(noisyAcc.get(k)[i],2),0.5)/sampleSize;
+
+
+//                for (int j = 0; j < 3; j++)
+//                {
+//                    variance[i][j]+=Math.sqrt(Math.abs(noisyAcc.get(k)[i]*noisyAcc.get(k)[j]))/sampleSize;
+//                }
 
             }
         }
 
         for (int i = 0; i < 3; i++)
         {
-           // if(variance[i][i]==0)
-                variance[i][i]/=sampleSize;
+//            if(variance[i][i]==0)
+//            {
+//
+//            }
+//                variance[i][i]/=sampleSize;
+
+            variance[i][i]=0.1;
         }
 
 

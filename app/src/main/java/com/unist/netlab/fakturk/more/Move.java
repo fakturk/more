@@ -84,7 +84,8 @@ public class Move
 
     public float[] lyingMove(Display mdisp, float oldVelocity, float oldDistance)
     {
-        final float alpha = (float) 0.8;
+        float dt = (System.nanoTime() - timestamp) / 1000000000.0f;
+        final float alpha = (float) 0.98;
         float  velocity, distanceX;
 
         float[] gravity = new float[3];
@@ -97,7 +98,7 @@ public class Move
         linear_acceleration[1] = ACC_DATA[1] - gravity[1];
         linear_acceleration[2] = ACC_DATA[2] - gravity[2];
 
-        float dt = (System.nanoTime() - timestamp) / 1000000000.0f;
+
 
         x = 276;
         y = 530;
@@ -121,9 +122,9 @@ public class Move
 
         Kalman kalman = new Kalman(q);
 
-        Matrix X = kalman.filter(dt,ACC_DATA);
+        Matrix X = kalman.filter(dt,linear_acceleration);
 
-        velocity = (float) X.get(3,0);
+        velocity = oldVelocity + (float) X.get(3,0);
         distanceX =oldDistance + (float) X.get(0,0);
 
         DisplayMetrics dm = new DisplayMetrics();
@@ -136,18 +137,18 @@ public class Move
 
         //oldVelocity = velocity;
 
-//        if(new_x<50)
-//        {
-//            new_x=50;
-//            velocity = 0;
-//            distanceX = 0;
-//        }
-//        if (new_x>right-width-50)
-//        {
-//            new_x = right-width-50;
-//            velocity = 0;
-//            distanceX = 0;
-//        }
+        if(new_x<50)
+        {
+            new_x=50;
+            velocity = 0;
+           // distanceX = 0;
+        }
+        if (new_x>right-width-50)
+        {
+            new_x = right-width-50;
+            velocity = 0;
+            //distanceX = 0;
+        }
 
         tvMain.setX(new_x);
         tvMain.setY(new_y);

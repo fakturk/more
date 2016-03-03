@@ -25,6 +25,7 @@ public class Kalman
     Matrix Z;       // real measurement 3 X 1
     Matrix G;       // error matrix 9 X 3
     Matrix variance;       // variance of error
+    Matrix QVariance;
 
     public Kalman(double[][] q)
     {
@@ -47,10 +48,12 @@ public class Kalman
         this.G = new Matrix(9,3);
 
         for (int i = 0; i < 9; i++) {
-            P_pre.set(i,i,1);
+            P_pre.set(i,i,10);
         }
 
         this.variance = new Matrix(q);
+        double[][] qVar = {{0.1, 0, 0}, {0, 0.1, 0}, {0, 0, 0.1}};
+        this.QVariance = new Matrix(qVar);
 
 
 
@@ -111,7 +114,7 @@ public class Kalman
         }
         Matrix Error = new Matrix(error);
         G.setMatrix(0,8,0,2,Error);
-        Q = (G.times(variance)).times(G.transpose());      // Q = G * variance * G^T
+        Q = (G.times(QVariance)).times(G.transpose());      // Q = G * variance * G^T
 
         double[][] state = new double[9][9];
         for (int i = 0; i < 9; i++)
