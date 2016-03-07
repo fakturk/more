@@ -3,13 +3,11 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-
     defaultConfig {
-        applicationId "com.unist.netlab.fakturk.more"
+        applicationId 'com.unist.netlab.fakturk.more'
         minSdkVersion 19
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        versionName '1.0'
     }
     buildTypes {
         release {
@@ -17,9 +15,21 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+//    productFlavors {
+//        vanilla {
+//           // packageName "com.unist.netlab.fakturk.more"
+//        }
+//
+//        strawberry {
+//          // packageName "com.unist.netlab.fakturk.more.strawberry"
+//        }
+//    }
+    productFlavors {
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.1.1'
 }
+

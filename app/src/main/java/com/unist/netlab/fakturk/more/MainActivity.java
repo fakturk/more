@@ -32,7 +32,7 @@ public class MainActivity extends Activity
     DisplayChange displayChange;
     Display mdisp;
     Double alpha;
-    float oldAccX, oldVelocity;
+    float oldAccX, oldVelocity, oldDistanceX;
     int noiseVarianceTimer;
     double  noiseAverage;
     double[][] noiseVariance;
@@ -87,6 +87,7 @@ public class MainActivity extends Activity
         alpha = 0.0;
         oldAccX = (float) 0.0;
         oldVelocity = (float) 0.0;
+        oldDistanceX = 0.0f;
         noiseVarianceTimer = 100;
         //noiseVariance=0;
         noiseAverage=0;
@@ -124,9 +125,11 @@ public class MainActivity extends Activity
 
                             // alpha = move.rotateText(mdisp, alpha);
                             float[] temp;
-                            temp = move.lyingMove(mdisp, oldAccX, oldVelocity);
+                            temp = move.lyingMove(mdisp, oldAccX, oldVelocity, oldDistanceX);
+
                             oldAccX = temp[0];
                             oldVelocity = temp[1];
+                            oldDistanceX = temp[2];
                         }
 
                     }
@@ -179,6 +182,7 @@ public class MainActivity extends Activity
             {
                 oldAccX = 0.0f;
                 oldVelocity = 0.0f;
+                oldDistanceX = 0.0f;
                 tvMain.setX(276);
                 tvMain.setY(530);
                 noiseVarianceTimer = 100;

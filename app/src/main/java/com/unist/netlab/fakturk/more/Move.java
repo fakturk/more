@@ -82,7 +82,7 @@ public class Move
         }
     }
 
-    public float[] lyingMove(Display mdisp, float oldVelocity, float oldDistance)
+    public float[] lyingMove(Display mdisp,float oldAcc, float oldVelocity, float oldDistance)
     {
         float dt = (System.nanoTime() - timestamp) / 1000000000.0f;
         final float alpha = (float) 0.98;
@@ -122,10 +122,20 @@ public class Move
 
         Kalman kalman = new Kalman(q);
 
-        Matrix X = kalman.filter(dt,linear_acceleration);
+        float[] accDiff = new float[3];
 
-        velocity = oldVelocity + (float) X.get(3,0);
-        distanceX =oldDistance + (float) X.get(0,0);
+        accDiff[0] = linear_acceleration[0] - oldAcc;
+        accDiff[1] = linear_acceleration[1];
+        accDiff[2] = linear_acceleration[2];
+
+
+        Matrix X = kalman.filter(dt,accDiff);
+
+       // velocity = oldVelocity + (float)X.get(6,0)*dt;
+       // distanceX = oldDistance + velocity*dt;
+
+        velocity = oldVelocity - (float) X.get(3,0);
+        distanceX =oldDistance - (float) X.get(0,0);
 
         DisplayMetrics dm = new DisplayMetrics();
         mdisp.getMetrics(dm);
@@ -161,7 +171,7 @@ public class Move
                 + "\n k z :"+X.get(8,0)
                );
 
-        return new float[]{velocity, distanceX};
+        return new float[]{linear_acceleration[0],velocity, distanceX};
 
 
     }
