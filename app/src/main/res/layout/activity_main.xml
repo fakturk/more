@@ -47,8 +47,8 @@
         android:id="@+id/textViewAngle"
         android:layout_alignParentEnd="true"
         android:layout_alignBottom="@+id/buttonSizeDown"
-        android:layout_toEndOf="@+id/textViewMain"
-        />
+        android:layout_toEndOf="@+id/buttonSizeDown"
+        android:layout_alignTop="@+id/buttonReset"/>
 
     <Button
         android:layout_width="wrap_content"

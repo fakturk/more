@@ -124,15 +124,18 @@ public class Move
 
         float[] accDiff = new float[3];
 
-        accDiff[0] = linear_acceleration[0] - oldAcc;
+        accDiff[0] = linear_acceleration[0];
         accDiff[1] = linear_acceleration[1];
         accDiff[2] = linear_acceleration[2];
 
 
         Matrix X = kalman.filter(dt,accDiff);
 
-       // velocity = oldVelocity + (float)X.get(6,0)*dt;
-       // distanceX = oldDistance + velocity*dt;
+//        velocity = oldVelocity + (float)X.get(6,0)*dt;
+//        distanceX = oldDistance + velocity*dt;
+
+//         velocity = (oldVelocity + accDiff[0]*dt);
+//         distanceX = (oldDistance + velocity*dt);
 
         velocity = oldVelocity - (float) X.get(3,0);
         distanceX =oldDistance - (float) X.get(0,0);
@@ -167,8 +170,8 @@ public class Move
                 +",\n distanceX : "+distanceX
                 + "\n new_x :"+new_x
                 + "\n k x :"+X.get(6,0)
-                + "\n k y :"+X.get(7,0)
-                + "\n k z :"+X.get(8,0)
+                +"\n accdiff :"+accDiff[0]
+
                );
 
         return new float[]{linear_acceleration[0],velocity, distanceX};
