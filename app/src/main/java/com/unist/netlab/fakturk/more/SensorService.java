@@ -205,14 +205,14 @@ public class SensorService extends Service implements SensorEventListener
 //                    GRA_DATA[2] = se.values[2];
 
 
-                case Sensor.TYPE_LINEAR_ACCELERATION :
-                    text_lacc = "";
-                    text_lacc += "X = " + se.values[0] + "\n";
-                    text_lacc += "Y = " + se.values[1] + "\n";
-                    text_lacc += "Z = " + se.values[2] + "\n";
-                    LACC_DATA[0] = se.values[0];
-                    LACC_DATA[1] = se.values[1];
-                    LACC_DATA[2] = se.values[2];
+//                case Sensor.TYPE_LINEAR_ACCELERATION :
+//                    text_lacc = "";
+//                    text_lacc += "X = " + se.values[0] + "\n";
+//                    text_lacc += "Y = " + se.values[1] + "\n";
+//                    text_lacc += "Z = " + se.values[2] + "\n";
+//                    LACC_DATA[0] = se.values[0];
+//                    LACC_DATA[1] = se.values[1];
+//                    LACC_DATA[2] = se.values[2];
 
             }
 
@@ -233,7 +233,7 @@ public class SensorService extends Service implements SensorEventListener
             mSensorTimeStamp = se.timestamp;
 
             intent.putExtra("ACC", text_acc);
-            intent.putExtra("LACC", text_lacc);
+//            intent.putExtra("LACC", text_lacc);
             intent.putExtra("GYR", text_gyr);
 //            intent.putExtra("GRA", text_gra);
 
@@ -241,7 +241,7 @@ public class SensorService extends Service implements SensorEventListener
             intent.putExtra("GYR_DATA", GYR_DATA);
 //            intent.putExtra("GRA_DATA", GRA_DATA);
             intent.putExtra("TIME",mSensorTimeStamp);
-            intent.putExtra("LACC_DATA", LACC_DATA);
+//            intent.putExtra("LACC_DATA", LACC_DATA);
 
 
 //

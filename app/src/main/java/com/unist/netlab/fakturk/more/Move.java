@@ -20,7 +20,7 @@ import static android.util.FloatMath.sqrt;
 public class Move
 {
     //SensorEvent se;
-    TextView tv;
+    TextView tv, tv2;
     TextView tvMain;
     TextView tvAngle;
     RelativeLayout root;
@@ -45,10 +45,11 @@ public class Move
     double  beta=0, betaR;//angles, beta is the current angle and alpha is the change
     Display display;
 
-    public Move(double[][] q, float[] ACC_DATA, float[] GYR_DATA, long timestamp, Display mdisp, TextView tv, TextView tvMain, TextView tvAngle, RelativeLayout root)
+    public Move(double[][] q, float[] ACC_DATA, float[] GYR_DATA, long timestamp, Display mdisp, TextView tv,TextView tv2, TextView tvMain, TextView tvAngle, RelativeLayout root)
     {
         //this.se = se;
         this.tv = tv;
+        this.tv2 = tv2;
 
         this.tvMain = tvMain;
         this.tvAngle = tvAngle;
@@ -82,11 +83,11 @@ public class Move
         }
     }
 
-    public float[] lyingMove(Display mdisp,float oldAcc, float oldVelocity, float oldDistance)
+    public float[] lyingMove(Display mdisp,float oldAcc, float oldVelocity, float oldDistance, float oldVelocityY, float oldDistanceY)
     {
         float dt = (System.nanoTime() - timestamp) / 1000000000.0f;
         final float alpha = (float) 0.98;
-        float  velocity, distanceX;
+        float  velocityX, distanceX, velocityY, distanceY;
 
         float[] gravity = new float[3];
         gravity[0] = alpha * gravity[0] + (1 - alpha) * ACC_DATA[0];
@@ -98,6 +99,107 @@ public class Move
         linear_acceleration[1] = ACC_DATA[1] - gravity[1];
         linear_acceleration[2] = ACC_DATA[2] - gravity[2];
 
+        float[] g = new float[3];
+        g[0] = ACC_DATA[0];
+        g[1] = ACC_DATA[1];
+        g[2] = ACC_DATA[2];
+
+        double norm_Of_g = Math.sqrt(g[0] * g[0] + g[1] * g[1] + g[2] * g[2]);
+
+// Normalize the accelerometer vector
+        g[0] = (float) (g[0] / norm_Of_g);
+        g[1] = (float) (g[1] / norm_Of_g);
+        g[2] = (float) (g[2] / norm_Of_g);
+
+        double inclination =  Math.toDegrees(Math.acos(g[2]));
+        double rotation =  Math.toDegrees(Math.atan2(g[0], g[1]));
+
+//        double gravity_z = Math.cos(Math.toRadians(inclination))*SensorManager.GRAVITY_EARTH;
+//        double gravity_x = Math.sin(Math.toRadians(inclination))*SensorManager.GRAVITY_EARTH;
+        double gravity_x = g[0]*SensorManager.GRAVITY_EARTH;
+        double gravity_y = g[1]*SensorManager.GRAVITY_EARTH;
+        double gravity_z = g[2]*SensorManager.GRAVITY_EARTH;
+
+
+
+        float axisX=0,  axisY=0, axisZ=0;
+
+        final float NS2S = 1.0f / 1000000000.0f;
+        final float[] deltaRotationVector = new float[4];
+        float tStamp = 0;
+        final double EPSILON = 0.000001;
+
+            final float dT = (timestamp - tStamp) * NS2S;
+            // Axis of the rotation sample, not normalized yet.
+             axisX = GYR_DATA[0];
+             axisY = GYR_DATA[1];
+             axisZ = GYR_DATA[2];
+
+            // Calculate the angular speed of the sample
+            float omegaMagnitude = sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
+
+            // Normalize the rotation vector if it's big enough to get the axis
+            if (omegaMagnitude > EPSILON) {
+                axisX /= omegaMagnitude;
+                axisY /= omegaMagnitude;
+                axisZ /= omegaMagnitude;
+            }
+
+            // Integrate around this axis with the angular speed by the timestep
+            // in order to get a delta rotation from this sample over the timestep
+            // We will convert this axis-angle representation of the delta rotation
+            // into a quaternion before turning it into the rotation matrix.
+            float thetaOverTwo = omegaMagnitude * dT / 2.0f;
+            float sinThetaOverTwo = sin(thetaOverTwo);
+            float cosThetaOverTwo = cos(thetaOverTwo);
+            deltaRotationVector[0] = sinThetaOverTwo * axisX;
+            deltaRotationVector[1] = sinThetaOverTwo * axisY;
+            deltaRotationVector[2] = sinThetaOverTwo * axisZ;
+            deltaRotationVector[3] = cosThetaOverTwo;
+
+        tStamp = timestamp;
+        float[] deltaRotationMatrix = new float[9];
+        SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
+//            String SD="";
+//            for (int i = 0; i < deltaRotationMatrix.length; i++)
+//            {
+//                SD += "delta [" + (i) + "] : " + deltaRotationMatrix[i] + "`\n";
+//            }
+
+
+        //tv2.setText(SD);
+
+
+        double filterCo = 1;
+        gravity_x = gravity_x*filterCo + (axisX*SensorManager.GRAVITY_EARTH)*(1-filterCo);
+        gravity_y = gravity_y*filterCo + (axisY*SensorManager.GRAVITY_EARTH)*(1-filterCo);
+        gravity_z = gravity_z*filterCo + (axisZ*SensorManager.GRAVITY_EARTH)*(1-filterCo);
+
+
+        linear_acceleration[0] = (float) (ACC_DATA[0] - gravity_x);
+        linear_acceleration[1] = (float) (ACC_DATA[1] - gravity_y);
+        linear_acceleration[2] = (float) (ACC_DATA[2] - gravity_z);
+
+        tv2.setText(
+                "array g: \n"
+                        + "X = " + g[0] + "\n"
+                        + "Y = " + g[1] + "\n"
+                        + "Z = " + g[2] + "\n"
+                +"\n"
+                +"Lin ACC : \n"
+                + "X = " + linear_acceleration[0] + "\n"
+                + "Y = " + linear_acceleration[1] + "\n"
+                + "Z = " + linear_acceleration[2] + "\n"
+                        +"\n"
+
+                +"gyr: \n"
+                        + "X = " + axisX + "\n"
+                        + "Y = " + axisY + "\n"
+                        + "Z = " + axisZ + "\n"
+                        +"\n"
+
+
+        );
 
 
         x = 276;
@@ -137,8 +239,11 @@ public class Move
 //         velocity = (oldVelocity + accDiff[0]*dt);
 //         distanceX = (oldDistance + velocity*dt);
 
-        velocity = oldVelocity - (float) X.get(3,0);
+        velocityX = oldVelocity - (float) X.get(3,0);
         distanceX =oldDistance - (float) X.get(0,0);
+
+        velocityY = oldVelocityY - (float) X.get(4,0);
+        distanceY =oldDistanceY - (float) X.get(1,0);
 
         DisplayMetrics dm = new DisplayMetrics();
         mdisp.getMetrics(dm);
@@ -153,28 +258,32 @@ public class Move
         if(new_x<50)
         {
             new_x=50;
-            velocity = 0;
+            velocityX = 0;
            // distanceX = 0;
         }
         if (new_x>right-width-50)
         {
             new_x = right-width-50;
-            velocity = 0;
+            velocityX = 0;
             //distanceX = 0;
         }
 
         tvMain.setX(new_x);
         tvMain.setY(new_y);
 
-        tvAngle.setText("Velocity : "+velocity
+        tvAngle.setText("Velocity : "+velocityX
                 +",\n distanceX : "+distanceX
                 + "\n new_x :"+new_x
                 + "\n k x :"+X.get(6,0)
                 +"\n accdiff :"+accDiff[0]
+                +"\n inclination : "+inclination
+                +"\n rotation : "+rotation
+                +"\n gravity x : "+gravity_x
+                +"\n gravity z : "+gravity_z
 
                );
 
-        return new float[]{linear_acceleration[0],velocity, distanceX};
+        return new float[]{linear_acceleration[0],velocityX, distanceX, velocityY, distanceY};
 
 
     }

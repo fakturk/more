@@ -24,9 +24,10 @@ public class DisplayChange
 
         tv.setText("ACC : \n"+ACC+
                 "\n"+
-                "GYR : \n"+GYR+
-                "\n"+
-                "LACC : \n"+LACC);
+                "GYR : \n"+GYR
+//                "\n"+
+//                "LACC : \n"+LACC
+        );
     }
 
     void setTvAngle(float[] ACC, float[] GYR)

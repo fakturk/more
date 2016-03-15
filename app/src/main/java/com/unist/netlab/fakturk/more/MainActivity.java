@@ -24,7 +24,7 @@ public class MainActivity extends Activity
 {
 
     //SensorManager SM;
-    TextView tv;
+    TextView tv, tv2;
     TextView tvMain;
     TextView tvAngle;
     Button buttonUp, buttonDown, buttonReset;
@@ -32,7 +32,7 @@ public class MainActivity extends Activity
     DisplayChange displayChange;
     Display mdisp;
     Double alpha;
-    float oldAccX, oldVelocity, oldDistanceX;
+    float oldAccX, oldVelocityX, oldDistanceX,oldVelocityY, oldDistanceY;
     int noiseVarianceTimer;
     double  noiseAverage;
     double[][] noiseVariance;
@@ -76,6 +76,7 @@ public class MainActivity extends Activity
 
         //SM = (SensorManager) getSystemService(SENSOR_SERVICE);
         tv = (TextView)  findViewById(R.id.textView);
+        tv2 = (TextView)  findViewById(R.id.textView2);
 
         tvMain = (TextView) findViewById(R.id.textViewMain);
         tvAngle = (TextView) findViewById(R.id.textViewAngle);
@@ -86,7 +87,7 @@ public class MainActivity extends Activity
         mdisp = getWindowManager().getDefaultDisplay();
         alpha = 0.0;
         oldAccX = (float) 0.0;
-        oldVelocity = (float) 0.0;
+        oldVelocityX = (float) 0.0;
         oldDistanceX = 0.0f;
         noiseVarianceTimer = 100;
         //noiseVariance=0;
@@ -120,16 +121,18 @@ public class MainActivity extends Activity
                             {
                                 noiseVariance = calculateNoiseVariance(noisyAcc);
                             }
-                            move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), intent.getLongExtra("TIME", 0), mdisp, tv, tvMain, tvAngle, root);
+                            move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), intent.getLongExtra("TIME", 0), mdisp, tv,tv2, tvMain, tvAngle, root);
                             //move.moveIt();
 
                             // alpha = move.rotateText(mdisp, alpha);
                             float[] temp;
-                            temp = move.lyingMove(mdisp, oldAccX, oldVelocity, oldDistanceX);
+                            temp = move.lyingMove(mdisp, oldAccX, oldVelocityX, oldDistanceX, oldVelocityY, oldDistanceY);
 
                             oldAccX = temp[0];
-                            oldVelocity = temp[1];
+                            oldVelocityX = temp[1];
                             oldDistanceX = temp[2];
+                            oldVelocityY = temp[3];
+                            oldDistanceY = temp[4];
                         }
 
                     }
@@ -181,8 +184,10 @@ public class MainActivity extends Activity
             public void onClick(View v)
             {
                 oldAccX = 0.0f;
-                oldVelocity = 0.0f;
+                oldVelocityX = 0.0f;
                 oldDistanceX = 0.0f;
+                oldVelocityY = 0.0f;
+                oldDistanceY = 0.0f;
                 tvMain.setX(276);
                 tvMain.setY(530);
                 noiseVarianceTimer = 100;
