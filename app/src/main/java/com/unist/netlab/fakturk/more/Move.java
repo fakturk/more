@@ -182,7 +182,7 @@ public class Move
 
         tv2.setText(
                 "array g: \n"
-                        + "X = " + g[0] + "\n"
+                        + "X =  " + g[0] + "\n"
                         + "Y = " + g[1] + "\n"
                         + "Z = " + g[2] + "\n"
                 +"\n"
