@@ -32,7 +32,7 @@ public class MainActivity extends Activity
     DisplayChange displayChange;
     Display mdisp;
     Double alpha;
-    float oldAccX, oldVelocityX, oldDistanceX,oldVelocityY, oldDistanceY;
+    float[] oldAcc, oldVelocity, oldDistance;
     int noiseVarianceTimer;
     double  noiseAverage;
     double[][] noiseVariance;
@@ -86,9 +86,9 @@ public class MainActivity extends Activity
         displayChange = new DisplayChange(tv, tvAngle);
         mdisp = getWindowManager().getDefaultDisplay();
         alpha = 0.0;
-        oldAccX = (float) 0.0;
-        oldVelocityX = (float) 0.0;
-        oldDistanceX = 0.0f;
+        oldAcc = new float[3];
+        oldVelocity = new float[3];
+        oldDistance = new float[3];
         noiseVarianceTimer = 100;
         //noiseVariance=0;
         noiseAverage=0;
@@ -125,14 +125,15 @@ public class MainActivity extends Activity
                             //move.moveIt();
 
                             // alpha = move.rotateText(mdisp, alpha);
-                            float[] temp;
-                            temp = move.lyingMove(mdisp, oldAccX, oldVelocityX, oldDistanceX, oldVelocityY, oldDistanceY);
+                            float[][] temp;
+                            temp = move.lyingMove(mdisp, oldAcc, oldVelocity, oldDistance);
 
-                            oldAccX = temp[0];
-                            oldVelocityX = temp[1];
-                            oldDistanceX = temp[2];
-                            oldVelocityY = temp[3];
-                            oldDistanceY = temp[4];
+                            for (int i = 0; i < 3; i++) {
+                                oldAcc[i] = temp[0][i];
+                                oldVelocity[i] = temp[1][i];
+                                oldDistance[i] = temp[2][i];
+                            }
+
                         }
 
                     }
@@ -183,11 +184,11 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View v)
             {
-                oldAccX = 0.0f;
-                oldVelocityX = 0.0f;
-                oldDistanceX = 0.0f;
-                oldVelocityY = 0.0f;
-                oldDistanceY = 0.0f;
+                for (int i = 0; i < 3; i++) {
+                    oldAcc[i] = 0.0f;
+                    oldVelocity[i] = 0.0f;
+                    oldDistance[i] = 0.0f;
+                }
                 tvMain.setX(276);
                 tvMain.setY(530);
                 noiseVarianceTimer = 100;

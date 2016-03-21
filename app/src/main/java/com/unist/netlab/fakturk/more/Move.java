@@ -83,11 +83,14 @@ public class Move
         }
     }
 
-    public float[] lyingMove(Display mdisp,float oldAcc, float oldVelocity, float oldDistance, float oldVelocityY, float oldDistanceY)
+    public float[][] lyingMove(Display mdisp,float[] oldAcc, float[] oldVelocity, float oldDistance[])
     {
         float dt = (System.nanoTime() - timestamp) / 1000000000.0f;
         final float alpha = (float) 0.98;
-        float  velocityX, distanceX, velocityY, distanceY;
+        //float  velocityX, distanceX, velocityY, distanceY;
+        float[] velocity = new float[3];
+        float[] distance = new float[3];
+        //float[] oldAcc = new float[3];
 
         float[] gravity = new float[3];
         gravity[0] = alpha * gravity[0] + (1 - alpha) * ACC_DATA[0];
@@ -239,40 +242,45 @@ public class Move
 //         velocity = (oldVelocity + accDiff[0]*dt);
 //         distanceX = (oldDistance + velocity*dt);
 
-        velocityX = oldVelocity - (float) X.get(3,0);
-        distanceX =oldDistance - (float) X.get(0,0);
+        for (int i = 0; i < 3; i++)
+        {
+            velocity[i]= oldVelocity[i] - (float) X.get(3+i,0);
+            distance[i] =oldDistance[i] - (float) X.get(i,0);
+        }
 
-        velocityY = oldVelocityY - (float) X.get(4,0);
-        distanceY =oldDistanceY - (float) X.get(1,0);
 
         DisplayMetrics dm = new DisplayMetrics();
         mdisp.getMetrics(dm);
+        float[] px = new float[3];
 
-        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, distanceX*1000,
-                dm);
-        new_x -= px;
-        new_y = y;
+        for (int i = 0; i < 3; i++) {
+             px[i] = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, distance[i]*1000,
+                    dm);
+        }
+
+        new_x -= px[0];
+        new_y -= px[1];
 
         //oldVelocity = velocity;
 
         if(new_x<50)
         {
             new_x=50;
-            velocityX = 0;
+            velocity[0] = 0;
            // distanceX = 0;
         }
         if (new_x>right-width-50)
         {
             new_x = right-width-50;
-            velocityX = 0;
+            velocity[0] = 0;
             //distanceX = 0;
         }
 
         tvMain.setX(new_x);
         tvMain.setY(new_y);
 
-        tvAngle.setText("Velocity : "+velocityX
-                +",\n distanceX : "+distanceX
+        tvAngle.setText("VelocityX : "+velocity[0]
+                +",\n distanceX : "+distance[0]
                 + "\n new_x :"+new_x
                 + "\n k x :"+X.get(6,0)
                 +"\n accdiff :"+accDiff[0]
@@ -283,7 +291,14 @@ public class Move
 
                );
 
-        return new float[]{linear_acceleration[0],velocityX, distanceX, velocityY, distanceY};
+         float[][] oldValues = new float[3][3];
+        for (int i = 0; i < 3; i++) {
+            oldValues[0][i] = linear_acceleration[i];
+            oldValues[1][i] = velocity[i];
+            oldValues[2][i] = distance[i];
+        }
+
+        return oldValues;
 
 
     }
