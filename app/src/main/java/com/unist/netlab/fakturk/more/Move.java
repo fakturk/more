@@ -25,7 +25,7 @@ public class Move
     TextView tvAngle;
     RelativeLayout root;
     //float[] events =new float[9];;
-    float[] ACC_DATA, GYR_DATA, ACC_DATA_LPF;
+    float[] ACC_DATA, GYR_DATA, ACC_DATA_LPF, gravity;
     double[][] q;
     float accX=0.0f;
     float factor = 0.02f;
@@ -40,12 +40,12 @@ public class Move
 
     long timestamp;
     int maxX, maxY;
-    float x,y, new_x=276, new_y;
+    float x,y, new_x=276, new_y=530;
     double r;
     double  beta=0, betaR;//angles, beta is the current angle and alpha is the change
     Display display;
 
-    public Move(double[][] q, float[] ACC_DATA, float[] GYR_DATA, long timestamp, Display mdisp, TextView tv,TextView tv2, TextView tvMain, TextView tvAngle, RelativeLayout root)
+    public Move(double[][] q, float[] ACC_DATA, float[] GYR_DATA, float[] gravity, long timestamp, Display mdisp, TextView tv, TextView tv2, TextView tvMain, TextView tvAngle, RelativeLayout root)
     {
         //this.se = se;
         this.tv = tv;
@@ -62,6 +62,7 @@ public class Move
         this.display = mdisp;
         this.ACC_DATA = new float[3];
         this.GYR_DATA = new float[3];
+        this.gravity = new float[3];
 //        this.GRA_DATA = new float[3];
 
          top = root.getTop();
@@ -79,11 +80,12 @@ public class Move
             //Log.d("eventAtama", Float.toString(e[i]));
             this.ACC_DATA[i]=ACC_DATA[i];
             this.GYR_DATA[i]=GYR_DATA[i];
+            this.gravity[i] = gravity[i];
 //            this.GRA_DATA[i]=GRA_DATA[i];
         }
     }
 
-    public float[][] lyingMove(Display mdisp,float[] oldAcc, float[] oldVelocity, float oldDistance[])
+    public float[][] lyingMove(Display mdisp,float[] oldAcc, float[] oldVelocity, float[] oldDistance, float[] gravity)
     {
         float dt = (System.nanoTime() - timestamp) / 1000000000.0f;
         final float alpha = (float) 0.98;
@@ -92,10 +94,10 @@ public class Move
         float[] distance = new float[3];
         //float[] oldAcc = new float[3];
 
-        float[] gravity = new float[3];
-        gravity[0] = alpha * gravity[0] + (1 - alpha) * ACC_DATA[0];
-        gravity[1] = alpha * gravity[1] + (1 - alpha) * ACC_DATA[1];
-        gravity[2] = alpha * gravity[2] + (1 - alpha) * ACC_DATA[2];
+//        float[] gravity = new float[3];
+//        gravity[0] = alpha * gravity[0] + (1 - alpha) * ACC_DATA[0];
+//        gravity[1] = alpha * gravity[1] + (1 - alpha) * ACC_DATA[1];
+//        gravity[2] = alpha * gravity[2] + (1 - alpha) * ACC_DATA[2];
 
         float[] linear_acceleration = new float[3];
         linear_acceleration[0] = ACC_DATA[0] - gravity[0];
@@ -259,7 +261,7 @@ public class Move
         }
 
         new_x -= px[0];
-        new_y -= px[1];
+        new_y += px[1];
 
         //oldVelocity = velocity;
 

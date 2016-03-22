@@ -27,13 +27,13 @@ public class MainActivity extends Activity
     TextView tv, tv2;
     TextView tvMain;
     TextView tvAngle;
-    Button buttonUp, buttonDown, buttonReset;
+    Button buttonUp, buttonDown, buttonReset, buttonCalibrate;
     Move move;
     DisplayChange displayChange;
     Display mdisp;
     Double alpha;
-    float[] oldAcc, oldVelocity, oldDistance;
-    int noiseVarianceTimer;
+    float[] oldAcc, oldVelocity, oldDistance, gravity;
+    int noiseVarianceTimer, gravityTimer;
     double  noiseAverage;
     double[][] noiseVariance;
     boolean isNoiseVarianceCalculated=false;
@@ -83,17 +83,23 @@ public class MainActivity extends Activity
         buttonUp = (Button) findViewById(R.id.buttonSizeUp);
         buttonDown = (Button) findViewById(R.id.buttonSizeDown);
         buttonReset = (Button) findViewById(R.id.buttonReset);
+        buttonCalibrate = (Button) findViewById(R.id.buttonCalibrate);
         displayChange = new DisplayChange(tv, tvAngle);
         mdisp = getWindowManager().getDefaultDisplay();
         alpha = 0.0;
         oldAcc = new float[3];
         oldVelocity = new float[3];
         oldDistance = new float[3];
+        gravity = new float[3];
         noiseVarianceTimer = 100;
+        gravityTimer = 100;
         //noiseVariance=0;
         noiseAverage=0;
 
         noisyAcc = new Vector<float[]>();
+
+        final float[] totalGravity = new float[3];
+
 
 
 
@@ -114,6 +120,13 @@ public class MainActivity extends Activity
                         {
                             noisyAcc.add(intent.getFloatArrayExtra("ACC_DATA"));
                             noiseVarianceTimer--;
+                            float[] temp = intent.getFloatArrayExtra("ACC_DATA");
+                            for (int j = 0; j < 3; j++)
+                            {
+                                totalGravity[j] += temp[j];
+
+                            }
+
                         }
                         else
                         {
@@ -121,12 +134,14 @@ public class MainActivity extends Activity
                             {
                                 noiseVariance = calculateNoiseVariance(noisyAcc);
                             }
-                            move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), intent.getLongExtra("TIME", 0), mdisp, tv,tv2, tvMain, tvAngle, root);
+
+                            gravity = calibrateGravity(totalGravity);
+                            move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"),gravity, intent.getLongExtra("TIME", 0), mdisp, tv,tv2, tvMain, tvAngle, root);
                             //move.moveIt();
 
                             // alpha = move.rotateText(mdisp, alpha);
                             float[][] temp;
-                            temp = move.lyingMove(mdisp, oldAcc, oldVelocity, oldDistance);
+                            temp = move.lyingMove(mdisp, oldAcc, oldVelocity, oldDistance, gravity);
 
                             for (int i = 0; i < 3; i++) {
                                 oldAcc[i] = temp[0][i];
@@ -196,7 +211,47 @@ public class MainActivity extends Activity
             }
         });
 
+        buttonCalibrate.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                noiseVarianceTimer=100;
+                noisyAcc.clear();
+                gravity = calibrateGravity(totalGravity);
+            }
+        });
+
 //
+    }
+
+    private float[] calibrateGravity(float[] totalGravity)
+    {
+        //float[] totalGravity = new float[3];
+//        totalGravity[0] = 0.0f;
+//        totalGravity[1] = 0.0f;
+//        totalGravity[2] = 0.0f;
+//        float[] temp = new float[3];
+//        temp[0] = 0.0f;
+//        temp[1] = 0.0f;
+//        temp[2] = 0.0f;
+        int sampleNumber = 100;
+//        for (int i = 0; i < sampleNumber; i++)
+//        {
+//            temp = getIntent().getFloatArrayExtra("ACC_DATA");
+//            for (int j = 0; j < 3; j++)
+//            {
+//                totalGravity[j] += temp[j];
+//
+//            }
+//
+//        }
+        for (int j = 0; j < 3; j++)
+        {
+            totalGravity[j] = totalGravity[j]/sampleNumber;
+
+        }
+        return totalGravity;
     }
 
     private double[][] calculateNoiseVariance(Vector<float[]> noisyAcc)
