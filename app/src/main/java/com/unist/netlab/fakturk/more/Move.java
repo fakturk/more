@@ -92,6 +92,8 @@ public class Move
         //float  velocityX, distanceX, velocityY, distanceY;
         float[] velocity = new float[3];
         float[] distance = new float[3];
+        float[] projection = new float[3];
+        float[] horizontal = new float[3];
         //float[] oldAcc = new float[3];
 
 //        float[] gravity = new float[3];
@@ -103,6 +105,17 @@ public class Move
         linear_acceleration[0] = ACC_DATA[0] - gravity[0];
         linear_acceleration[1] = ACC_DATA[1] - gravity[1];
         linear_acceleration[2] = ACC_DATA[2] - gravity[2];
+
+        float projectionCoefficient = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            projectionCoefficient+= gravity[i]*linear_acceleration[i];
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            projection[i]=projectionCoefficient*gravity[i];
+            horizontal[i]=linear_acceleration[i]-projection[i];
+        }
 
         float[] g = new float[3];
         g[0] = ACC_DATA[0];
@@ -231,12 +244,12 @@ public class Move
 
         float[] accDiff = new float[3];
 
-        accDiff[0] = linear_acceleration[0];
-        accDiff[1] = linear_acceleration[1];
-        accDiff[2] = linear_acceleration[2];
+        accDiff[0] = oldAcc[0]- linear_acceleration[0];
+        accDiff[1] = oldAcc[1]-linear_acceleration[1];
+        accDiff[2] = oldAcc[2]-linear_acceleration[2];
 
 
-        Matrix X = kalman.filter(dt,accDiff);
+        Matrix X = kalman.filter(dt,linear_acceleration);
 
 //        velocity = oldVelocity + (float)X.get(6,0)*dt;
 //        distanceX = oldDistance + velocity*dt;
@@ -261,7 +274,7 @@ public class Move
         }
 
         new_x -= px[0];
-        new_y += px[1];
+        new_y -= px[1];
 
         //oldVelocity = velocity;
 
@@ -274,6 +287,18 @@ public class Move
         if (new_x>right-width-50)
         {
             new_x = right-width-50;
+            velocity[0] = 0;
+            //distanceX = 0;
+        }
+        if(new_y<50)
+        {
+            new_y=50;
+            velocity[0] = 0;
+            // distanceX = 0;
+        }
+        if (new_y>bottom-height-50)
+        {
+            new_y = bottom-height-50;
             velocity[0] = 0;
             //distanceX = 0;
         }
@@ -306,6 +331,13 @@ public class Move
     }
 
     protected float[] lowPass( float[] input, float[] output ) {
+        if ( output == null ) return input;
+        for ( int i=0; i<input.length; i++ ) {
+            output[i] = output[i] + factor * (input[i] - output[i]);
+        }
+        return output;
+    }
+    protected float[] highPass( float[] input, float[] output ) {
         if ( output == null ) return input;
         for ( int i=0; i<input.length; i++ ) {
             output[i] = output[i] + factor * (input[i] - output[i]);
