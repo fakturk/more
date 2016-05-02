@@ -49,6 +49,9 @@ public class MainActivity extends Activity
     float epsilon = 0.01f;
     float THvar[] = {epsilon, epsilon, epsilon};
     float[] varIncrease = {0,0,0};
+    StatisticCalculations stats;
+    LowPassFilter lpf;
+    Gravity g;
 
 
 
@@ -65,7 +68,7 @@ public class MainActivity extends Activity
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
+    protected void onCreate(final Bundle savedInstanceState)
     {
         //Log.d( LOG_TAG, "onCreate" );
 
@@ -105,6 +108,10 @@ public class MainActivity extends Activity
 
         final float[] totalGravity = new float[3];
 
+        stats = new StatisticCalculations();
+        lpf = new LowPassFilter();
+        g= new Gravity();
+
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver()
@@ -122,7 +129,7 @@ public class MainActivity extends Activity
                         if (noiseVarianceTimer > 0)
                         {
 
-                            lowPassAcc = lowPass(temp, lowPassAcc);
+                            lowPassAcc = lpf.lowPass(factor ,temp, lowPassAcc);
                             noisyAcc.add(lowPassAcc);
                             noiseVarianceTimer--;
 
@@ -136,10 +143,10 @@ public class MainActivity extends Activity
                         {
                             if (!isNoiseVarianceCalculated)
                             {
-                                noiseVariance = calculateNoiseVariance(noisyAcc);
+                                noiseVariance = stats.calculateNoiseVariance(noisyAcc);
                             }
 
-                            gravity = calibrateGravity(totalGravity);
+                            gravity = g.calibrateGravity(totalGravity, sampleNumber);
                             //gravity = gravity(tempAcc, gravity);
                             move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
                             //move.moveIt();
@@ -220,7 +227,7 @@ public class MainActivity extends Activity
 
                 noiseVarianceTimer = sampleNumber;
                 noisyAcc.clear();
-                gravity = calibrateGravity(totalGravity);
+                gravity = g.calibrateGravity(totalGravity, sampleNumber);
             }
         });
 
@@ -230,54 +237,13 @@ public class MainActivity extends Activity
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    public float[] mean(Vector<float[]> data)
-    {
 
-        int dataArrayLength = data.elementAt(0).length;
-        float[] total = new float[dataArrayLength];
-
-        for (int i = 0; i < data.size(); i++)
-        {
-            for (int j = 0; j < dataArrayLength; j++)
-            {
-                total[j] += data.elementAt(i)[j];
-            }
-        }
-        for (int j = 0; j < dataArrayLength; j++)
-        {
-            total[j] = total[j] / data.size();
-        }
-
-        return total;
-    }
-
-    public float[] variance(Vector<float[]> data)
-    {
-
-        float[] mean = mean(data);
-        int dataArrayLength = data.elementAt(0).length;
-        float[] temp = new float[dataArrayLength];
-
-        for (int i = 0; i < data.size(); i++)
-        {
-            for (int j = 0; j < dataArrayLength; j++)
-            {
-                temp[j] += Math.pow(data.elementAt(i)[j] - mean[j], 2);
-            }
-        }
-        for (int j = 0; j < dataArrayLength; j++)
-        {
-            temp[j] = temp[j] / data.size();
-        }
-
-        return temp;
-    }
 
     float[] gravity(Vector<float[]> accData, float[] estimatedGravity)
     {
 
-        float[] wMean = mean(accData);
-        float[] wVar = variance(accData);
+        float[] wMean = stats.mean(accData);
+        float[] wVar = stats.variance(accData);
 
         float norm = 0;
 
@@ -309,99 +275,10 @@ public class MainActivity extends Activity
 
     }
 
-    private float[] calibrateGravity(float[] totalGravity)
-    {
-        //float[] totalGravity = new float[3];
-//        totalGravity[0] = 0.0f;
-//        totalGravity[1] = 0.0f;
-//        totalGravity[2] = 0.0f;
-//        float[] temp = new float[3];
-//        temp[0] = 0.0f;
-//        temp[1] = 0.0f;
-//        temp[2] = 0.0f;
-        //int sampleNumber = 1000;
-//        for (int i = 0; i < sampleNumber; i++)
-//        {
-//            temp = getIntent().getFloatArrayExtra("ACC_DATA");
-//            for (int j = 0; j < 3; j++)
-//            {
-//                totalGravity[j] += temp[j];
-//
-//            }
-//
-//        }
-        for (int j = 0; j < 3; j++)
-        {
-            totalGravity[j] = totalGravity[j] / sampleNumber;
-
-        }
-        return totalGravity;
-    }
-
-    private double[][] calculateNoiseVariance(Vector<float[]> noisyAcc)
-    {
-
-        double[][] variance = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
-        double[] avg = {0, 0, 0};
-        double[] total = {0, 0, 0};
-        int sampleSize = noisyAcc.size();
-
-        for (int i = 0; i < sampleSize; i++)
-        {
-            total[0] += noisyAcc.get(i)[0];
-            total[1] += noisyAcc.get(i)[1];
-            total[2] += noisyAcc.get(i)[2];
-        }
-        for (int i = 0; i < 3; i++)
-        {
-            avg[i] = total[i] / (sampleSize * 1.0);
-            // Log.d("avg","avg : "+avg[i]);
-        }
-
-        for (int k = 0; k < sampleSize; k++)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-
-                variance[i][i] += Math.sqrt((noisyAcc.get(k)[i] - avg[i]) * (noisyAcc.get(k)[i] - avg[i]));
-                //   Log.d("variance","variance "+i+" : "+variance[i][i]+", acc : "+noisyAcc.get(k)[i]+" avg : "+avg[i]);
-
-//                variance[i][i]+=Math.pow(Math.pow(noisyAcc.get(k)[i],2),0.5)/sampleSize;
 
 
-//                for (int j = 0; j < 3; j++)
-//                {
-//                    variance[i][j]+=Math.sqrt(Math.abs(noisyAcc.get(k)[i]*noisyAcc.get(k)[j]))/sampleSize;
-//                }
-
-            }
-        }
-
-        for (int i = 0; i < 3; i++)
-        {
-//            if(variance[i][i]==0)
-//            {
-//
-//            }
-//                variance[i][i]/=sampleSize;
-
-            variance[i][i] = 0.1;
-        }
 
 
-        return variance;
-    }
-
-    protected float[] lowPass(float[] input, float[] output)
-    {
-
-        if (output == null) return input;
-        for (int i = 0; i < input.length; i++)
-        {
-            output[i] = output[i] + factor * (input[i] - output[i]);
-        }
-        return output;
-    }
 
     @Override
     protected void onPause()
