@@ -43,7 +43,7 @@ public class MainActivity extends Activity
     double[][] noiseVariance;
     boolean isNoiseVarianceCalculated = false;
     Vector<float[]> noisyAcc;
-    Vector<float[]> tempAcc;
+//    Vector<float[]> tempAcc;
     float factor = 0.02f;
     int sampleNumber = 100;
 
@@ -59,7 +59,7 @@ public class MainActivity extends Activity
 
     //MyReceiver myReceiver=null;
     Intent i;
-    static final String LOG_TAG = "ServiceActivity";
+//    static final String LOG_TAG = "ServiceActivity";
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -104,7 +104,7 @@ public class MainActivity extends Activity
         //noiseVariance=0;
         noiseAverage = 0;
 
-        noisyAcc = new Vector<float[]>();
+        noisyAcc = new Vector<>();
 
         final float[] totalGravity = new float[3];
 
@@ -275,20 +275,15 @@ public class MainActivity extends Activity
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
 
-        if (id == R.id.action_settings)
-        {
-            return true;
-        }
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
 
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
