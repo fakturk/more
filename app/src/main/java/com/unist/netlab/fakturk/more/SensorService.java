@@ -17,8 +17,11 @@ import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 
 
 public class SensorService extends Service implements SensorEventListener
@@ -85,16 +88,16 @@ public class SensorService extends Service implements SensorEventListener
 
 
         FileOutputStream fOut = null;
-//        try
-//        {
-//            myFile.createNewFile();
-//            fOut = new FileOutputStream(myFile);
-//            bos = new BufferedOutputStream(fOut);
-//        }catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try
+        {
+            myFile.createNewFile();
+            fOut = new FileOutputStream(myFile);
+            bos = new BufferedOutputStream(fOut);
+        }catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
 
@@ -136,13 +139,13 @@ public class SensorService extends Service implements SensorEventListener
         Toast.makeText(this, "Service Stopped", Toast.LENGTH_LONG).show();
 //        Log.d( LOG_TAG, "onDestroy" );
         SM.unregisterListener(this);
-//        try
-//        {
-//            bos.close();
-//        } catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
+        try
+        {
+            bos.close();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
         //super.onDestroy();
     }
@@ -231,6 +234,8 @@ public class SensorService extends Service implements SensorEventListener
 
 
             mSensorTimeStamp = se.timestamp;
+            long timeInMillis = (new Date()).getTime()
+                    + (mSensorTimeStamp - System.nanoTime()) / 1000000L;
 
             intent.putExtra("ACC", text_acc);
 //            intent.putExtra("LACC", text_lacc);
@@ -245,19 +250,21 @@ public class SensorService extends Service implements SensorEventListener
 
 
 //
-//            try
-//            {
-//                Toast.makeText(this, "Teheey", Toast.LENGTH_LONG).show();
-//                bos.write("ACC\n".getBytes());
-//                bos.write(text_acc.getBytes());
-//                bos.write("GYR\n".getBytes());
-//                bos.write(text_gyr.getBytes());
+            try
+            {
+                Toast.makeText(this, "Teheey", Toast.LENGTH_LONG).show();
+                bos.write("ACC\n".getBytes());
+                bos.write((Long.toString(timeInMillis)+"\n").getBytes());
+                bos.write(text_acc.getBytes());
+                bos.write("GYR\n".getBytes());
+                bos.write((Long.toString(timeInMillis)+"\n").getBytes());
+                bos.write(text_gyr.getBytes());
 //                bos.write("GRA\n".getBytes());
 //                bos.write(text_gra.getBytes());
-//            } catch (IOException e)
-//            {
-//                e.printStackTrace();
-//            }
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
     }
