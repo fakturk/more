@@ -1,14 +1,16 @@
 package com.unist.netlab.fakturk.more;
 
+
 import android.app.Activity;
-import android.graphics.Canvas;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.support.v7.app.ActionBarActivity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,264 +18,257 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import static android.util.FloatMath.cos;
-import static android.util.FloatMath.sin;
-import static android.util.FloatMath.sqrt;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.util.Vector;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity
+{
 
-    SensorManager SM;
+    //SensorManager SM;
     TextView tv, tv2;
     TextView tvMain;
-    Button buttonUp, buttonDown;
+    TextView tvAngle;
+    Button buttonUp, buttonDown, buttonReset, buttonCalibrate;
+    Move move;
+    DisplayChange displayChange;
+    Display mdisp;
+    Double alpha;
+    float[] oldAcc, oldVelocity, oldDistance, gravity, lowPassAcc;
+    int noiseVarianceTimer, gravityTimer;
+    double noiseAverage;
+    double[][] noiseVariance;
+    boolean isNoiseVarianceCalculated = false;
+    Vector<float[]> noisyAcc;
+    //    Vector<float[]> tempAcc;
+    float factor = 0.02f;
+    int sampleNumber = 100;
+
+
+
+    StatisticCalculations stats;
+    LowPassFilter lpf;
+    Gravity g;
+
+
 
     RelativeLayout root;
 
+    //MyReceiver myReceiver=null;
+    Intent i;
+//    static final String LOG_TAG = "ServiceActivity";
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
 
-
-
-    SensorEventListener sL = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent se) {
-            move(se);
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-        }
-    };
-
-    void move(SensorEvent se)
-    {
-        String SD = "";
-        int originalHeight = tvMain.getHeight();
-        int originalWidth = tvMain.getWidth();
-
-        int top = root.getTop();
-        int bottom = root.getBottom();
-        int left = root.getLeft();
-        int right = root.getRight();
-        int height = tvMain.getHeight();
-        int width = tvMain.getWidth();
-
-
-        if (se.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-
-            for (int i = 0; i < se.values.length; i++)
-            {
-                SD += "acceleration[" + i + "] : " + se.values[i] + "`\n";
-            }
-            tv.setText(SD);
-            //RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(150, 50);
-            //layoutParams = (RelativeLayout.LayoutParams) tvMain.getLayoutParams();
-            //layoutParams.leftMargin= (int) (layoutParams.leftMargin+se.values[1]-9.8-se.values[2]);
-            //layoutParams.rightMargin = (int) (layoutParams.rightMargin+se.values[0]);
-            //layoutParams.topMargin = (int) (layoutParams.topMargin+se.values[1]-9.8-se.values[2]);
-            //layoutParams.bottomMargin = (int) (layoutParams.bottomMargin+se.values[1]-9.8-se.values[2]);
-
-            final float alpha = (float) 0.8;
-
-            float[] gravity = new float[3];
-            gravity[0] = alpha * gravity[0] + (1 - alpha) * se.values[0];
-            gravity[1] = alpha * gravity[1] + (1 - alpha) * se.values[1];
-            gravity[2] = alpha * gravity[2] + (1 - alpha) * se.values[2];
-
-            float[] linear_acceleration = new float[3];
-            linear_acceleration[0] = se.values[0] - gravity[0];
-            linear_acceleration[1] = se.values[1] - gravity[1];
-            linear_acceleration[2] = se.values[2] - gravity[2];
-
-
-           // tvMain.setLayoutParams(layoutParams);
-            //tvMain.invalidate();
-
-
-
-          //  tvMain.setX((left+right)/2);
-          //  tvMain.setY((top+bottom)/2);
-
-            /*
-            if (tvMain.getX() + linear_acceleration[0] > left) {
-                tvMain.setX(tvMain.getX() + linear_acceleration[0]);
-            } else if (tvMain.getX() + linear_acceleration[0] <= left) {
-                tvMain.setX(left);
-            }
-            if (tvMain.getX() + width + linear_acceleration[0] < right) {
-                tvMain.setX(tvMain.getX() + linear_acceleration[0]);
-            } else if (tvMain.getX() + width + linear_acceleration[0] >= right) {
-                tvMain.setX(right - width);
-            }
-            if ((tvMain.getY() - (linear_acceleration[1] - se.values[2])) > top) {
-                tvMain.setY((float) (tvMain.getY() - (linear_acceleration[1] - se.values[2])));
-            } else if ((tvMain.getY() - (linear_acceleration[1] - se.values[2])) <= top) {
-                tvMain.setY(top);
-            }
-            if ((tvMain.getY() + height - (linear_acceleration[1] - se.values[2])) < bottom) {
-                tvMain.setY((float) (tvMain.getY() - (linear_acceleration[1] - se.values[2])));
-            } else if ((tvMain.getY() + height - (linear_acceleration[1] - se.values[2])) >= bottom) {
-                tvMain.setY(bottom - height);
-            }
-            */
-
-
-        }
-        if (se.sensor.getType() == Sensor.TYPE_GYROSCOPE)
-        {
-            for (int i = 0; i < se.values.length; i++)
-            {
-                SD += "gyroscope[" + (i+3) + "] : " + se.values[i] + "`\n";
-            }
-
-            tv2.setText(SD);
-             final float NS2S = 1.0f / 1000000000.0f;
-             final float[] deltaRotationVector = new float[4];
-            float timestamp = 0;
-            final double EPSILON = 0.000001;
-            if (timestamp != 0) {
-                final float dT = (se.timestamp - timestamp) * NS2S;
-                // Axis of the rotation sample, not normalized yet.
-                float axisX = se.values[0];
-                float axisY = se.values[1];
-                float axisZ = se.values[2];
-
-                // Calculate the angular speed of the sample
-                float omegaMagnitude = sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
-
-                // Normalize the rotation vector if it's big enough to get the axis
-                if (omegaMagnitude > EPSILON) {
-                    axisX /= omegaMagnitude;
-                    axisY /= omegaMagnitude;
-                    axisZ /= omegaMagnitude;
-                }
-
-                // Integrate around this axis with the angular speed by the timestep
-                // in order to get a delta rotation from this sample over the timestep
-                // We will convert this axis-angle representation of the delta rotation
-                // into a quaternion before turning it into the rotation matrix.
-                float thetaOverTwo = omegaMagnitude * dT / 2.0f;
-                float sinThetaOverTwo = sin(thetaOverTwo);
-                float cosThetaOverTwo = cos(thetaOverTwo);
-                deltaRotationVector[0] = sinThetaOverTwo * axisX;
-                deltaRotationVector[1] = sinThetaOverTwo * axisY;
-                deltaRotationVector[2] = sinThetaOverTwo * axisZ;
-                deltaRotationVector[3] = cosThetaOverTwo;
-            }
-            timestamp = se.timestamp;
-            float[] deltaRotationMatrix = new float[9];
-            SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
-            /*
-            for (int i = 0; i < deltaRotationMatrix.length; i++)
-            {
-                SD += "delta [" + (i+3) + "] : " + deltaRotationMatrix[i] + "`\n";
-            }
-            */
-
-            tv2.setText(SD);
-            //tvMain.setX(originalWidth*2);
-            //tvMain.setY(originalHeight*2);
-
-            if (tvMain.getX() - se.values[1] +se.values[2]> left) {
-                smoothMove('x', tvMain.getX(), (-se.values[1] + se.values[2]));
-            } else if (tvMain.getX() - se.values[1] +se.values[2] <= left) {
-                tvMain.setX(left);
-            }
-            if (tvMain.getX() + width - se.values[1] +se.values[2] < right) {
-                smoothMove('x', tvMain.getX(), (-se.values[1] + se.values[2]));
-            } else if (tvMain.getX() + width - se.values[1] +se.values[2] >= right) {
-                tvMain.setX(right - width);
-            }
-            if ((tvMain.getY() - (se.values[0]  +se.values[2])) > top) {
-                smoothMove('y', tvMain.getY(), -(se.values[0] + se.values[2]));
-            } else if ((tvMain.getY() - (se.values[0]  +se.values[2])) <= top) {
-                tvMain.setY(top);
-            }
-            if ((tvMain.getY() + height - (se.values[0]  +se.values[2])) < bottom) {
-                smoothMove('y', tvMain.getY(), -(se.values[0] + se.values[2]));
-            } else if ((tvMain.getY() + height - (se.values[0] +se.values[2] )) >= bottom) {
-                tvMain.setY(bottom - height);
-            }
-
-        }
-    }
-
-    void smoothMove(char type,float position, double subtractValue)
-    {
-        float smooth ;
-        int smoothLevel = 3;
-        if (type=='x')
-        {
-            if (smoothLevel!=0) {
-                for (int i = 0; i < smoothLevel; i++) {
-                    smooth = (float) (position + subtractValue / (2 ^ (i + 1)));
-                    tvMain.setX(smooth);
-                }
-            }
-            smooth = (float) (position + subtractValue/(2^(smoothLevel)));
-            tvMain.setX(smooth);
-
-        }
-        else if (type=='y')
-        {
-            if (smoothLevel!=0) {
-                for (int i = 0; i < smoothLevel; i++) {
-                    smooth = (float) (position + subtractValue / (2 ^ (i + 1)));
-                    tvMain.setY(smooth);
-                }
-            }
-                smooth = (float) (position + subtractValue/(2^(smoothLevel)));
-                tvMain.setY(smooth);
-
-
-        }
-
-    }
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState)
+    {
+        //Log.d( LOG_TAG, "onCreate" );
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SM = (SensorManager) getSystemService(SENSOR_SERVICE);
-        tv = (TextView)findViewById(R.id.textView);
-        tv2 = (TextView)findViewById(R.id.textView2);
-        tvMain = (TextView)findViewById(R.id.textViewMain);
-        buttonUp =(Button)findViewById(R.id.buttonUp);
-        buttonDown = (Button)findViewById(R.id.buttonDown);
-        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
-        SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE),SensorManager.SENSOR_DELAY_GAME);
-
-
         root = (RelativeLayout) findViewById(R.id.root);
 
-        buttonUp.setOnClickListener(new View.OnClickListener() {
+
+        i = new Intent(this, SensorService.class);
+        //  Log.d(LOG_TAG, "onCreate/startService");
+
+        //SM = (SensorManager) getSystemService(SENSOR_SERVICE);
+        tv = (TextView) findViewById(R.id.textView);
+        tv2 = (TextView) findViewById(R.id.textView2);
+
+        tvMain = (TextView) findViewById(R.id.textViewMain);
+        tvAngle = (TextView) findViewById(R.id.textViewAngle);
+        buttonUp = (Button) findViewById(R.id.buttonSizeUp);
+        buttonDown = (Button) findViewById(R.id.buttonSizeDown);
+        buttonReset = (Button) findViewById(R.id.buttonReset);
+        buttonCalibrate = (Button) findViewById(R.id.buttonCalibrate);
+        displayChange = new DisplayChange(tv, tvAngle);
+        mdisp = getWindowManager().getDefaultDisplay();
+        alpha = 0.0;
+        oldAcc = new float[3];
+        lowPassAcc = new float[3];
+        oldVelocity = new float[3];
+        oldDistance = new float[3];
+        gravity = new float[3];
+        noiseVarianceTimer = sampleNumber;
+        gravityTimer = sampleNumber;
+        //noiseVariance=0;
+        noiseAverage = 0;
+
+        noisyAcc = new Vector<>();
+
+        final float[] totalGravity = new float[3];
+
+        stats = new StatisticCalculations();
+        lpf = new LowPassFilter();
+        g= new Gravity();
+
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                new BroadcastReceiver()
+                {
+                    @Override
+                    public void onReceive(Context context, Intent intent)
+                    {
+
+
+                        float[] temp = intent.getFloatArrayExtra("ACC_DATA");
+                        //tempAcc.add(temp);
+                        displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"), intent.getStringExtra("LACC"));
+                        //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
+
+                        if (noiseVarianceTimer > 0)
+                        {
+
+                            lowPassAcc = lpf.lowPass(factor ,temp, lowPassAcc);
+                            noisyAcc.add(lowPassAcc);
+                            noiseVarianceTimer--;
+
+                            for (int j = 0; j < 3; j++)
+                            {
+                                totalGravity[j] += lowPassAcc[j];
+
+                            }
+
+                        } else
+                        {
+                            if (!isNoiseVarianceCalculated)
+                            {
+                                noiseVariance = stats.calculateNoiseVariance(noisyAcc);
+                            }
+
+                            gravity = g.calibrateGravity(totalGravity, sampleNumber);
+                            //gravity = gravity(tempAcc, gravity);
+                            move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
+                            //move.moveIt();
+
+                            // alpha = move.rotateText(mdisp, alpha);
+                            float[][] temp2;
+                            temp2 = move.lyingMove(mdisp, oldAcc, oldVelocity, oldDistance, gravity);
+
+                            for (int i = 0; i < 3; i++)
+                            {
+                                oldAcc[i] = temp2[0][i];
+                                oldVelocity[i] = temp2[1][i];
+                                oldDistance[i] = temp2[2][i];
+                            }
+
+                        }
+
+                    }
+                }, new IntentFilter(SensorService.ACTION_SENSOR_BROADCAST)
+        );
+
+        //SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
+        //SM.registerListener(sL, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_GAME);
+
+
+        buttonUp.setOnClickListener(new View.OnClickListener()
+        {
 
 
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
+
                 DisplayMetrics metrics;
                 metrics = getApplicationContext().getResources().getDisplayMetrics();
-                float Textsize =tv.getTextSize()/metrics.density;
-                tvMain.setTextSize(Textsize*2);
+                float Textsize = tv.getTextSize() / metrics.density;
+                tvMain.setTextSize(Textsize * 2);
             }
         });
 
-        buttonDown.setOnClickListener(new View.OnClickListener() {
+        buttonDown.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
+
                 DisplayMetrics metrics;
                 metrics = getApplicationContext().getResources().getDisplayMetrics();
-                float Textsize =tv.getTextSize()/metrics.density;
-                tvMain.setTextSize(Textsize/2);
+                float Textsize = tv.getTextSize() / metrics.density;
+                tvMain.setTextSize(Textsize / 2);
             }
         });
+
+        buttonReset.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+
+                for (int i = 0; i < 3; i++)
+                {
+                    oldAcc[i] = 0.0f;
+                    oldVelocity[i] = 0.0f;
+                    oldDistance[i] = 0.0f;
+                }
+                tvMain.setX(276);
+                tvMain.setY(530);
+                noiseVarianceTimer = sampleNumber;
+                noisyAcc.clear();
+            }
+        });
+
+        buttonCalibrate.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+
+                noiseVarianceTimer = sampleNumber;
+                noisyAcc.clear();
+                gravity = g.calibrateGravity(totalGravity, sampleNumber);
+            }
+        });
+
+//
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+
+
+
+
+
+
+
+
+    @Override
+    protected void onPause()
+    {
+
+        super.onPause();
+        //File sd = Environment.getExternalStorageDirectory();
+        //String path = sd + "/" + "SensorData.db" + ".xml";
+
 
     }
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    protected void onResume()
+    {
+
+        super.onResume();
+        startService(new Intent(this, SensorService.class));
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
@@ -286,14 +281,61 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+
+
+        super.onDestroy();
     }
 
 
-}
+    @Override
+    public void onStart()
+    {
 
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.unist.netlab.fakturk.more/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop()
+    {
+
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.unist.netlab.fakturk.more/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }
+}

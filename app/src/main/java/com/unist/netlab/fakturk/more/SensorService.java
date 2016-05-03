@@ -28,7 +28,9 @@ public class SensorService extends Service implements SensorEventListener
 {
 
 
-    private String text, text_acc="not catched\n", text_gyr="not catched\n", text_gra="not catched\n",text_lacc="not catched\n";
+//    private String text, text_acc="not catched\n", text_gyr="not catched\n", text_gra="not catched\n",text_lacc="not catched\n";
+    private String text, text_acc="", text_gyr="";
+
     SensorManager SM;
     float[] ACC_DATA=new float[3];
     float[] GYR_DATA=new float[3];
@@ -53,13 +55,21 @@ public class SensorService extends Service implements SensorEventListener
     File sd = Environment.getExternalStorageDirectory();
     Calendar c = Calendar.getInstance();
     String path = sd + "/" + "SensorData" +c.getTime()+ ".xml";
+    String path_acc = sd + "/" + "SensorDataAcc" +c.getTime()+ ".xml";
+    String path_gyr = sd + "/" + "SensorDataGyr" +c.getTime()+ ".xml";
 
 
     String mDestXmlFilename=path;
+    String mDestXmlFilenameAcc=path_acc;
+    String mDestXmlFilenameGyr=path_gyr;
 
 
     File myFile = new File(mDestXmlFilename);
+    File fileAcc = new File(mDestXmlFilenameAcc);
+    File fileGyr = new File(mDestXmlFilenameGyr);
     BufferedOutputStream bos;
+    BufferedOutputStream bos_acc;
+    BufferedOutputStream bos_gyr;
 
 
 
@@ -88,11 +98,19 @@ public class SensorService extends Service implements SensorEventListener
 
 
         FileOutputStream fOut = null;
+        FileOutputStream fOutAcc = null;
+        FileOutputStream fOutGyr = null;
         try
         {
             myFile.createNewFile();
+            fileAcc.createNewFile();
+            fileGyr.createNewFile();
             fOut = new FileOutputStream(myFile);
+            fOutAcc = new FileOutputStream(fileAcc);
+            fOutGyr = new FileOutputStream(fileGyr);
             bos = new BufferedOutputStream(fOut);
+            bos_acc = new BufferedOutputStream(fOutAcc);
+            bos_gyr = new BufferedOutputStream(fOutGyr);
         }catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -103,8 +121,8 @@ public class SensorService extends Service implements SensorEventListener
 
 
         SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
-        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
-       // SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_NORMAL);
+        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_FASTEST);
+       // SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_FASTEST);
 
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Intent bIntent = new Intent(SensorService.this, MainActivity.class);
@@ -142,6 +160,8 @@ public class SensorService extends Service implements SensorEventListener
         try
         {
             bos.close();
+            bos_acc.close();
+            bos_gyr.close();
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -179,6 +199,7 @@ public class SensorService extends Service implements SensorEventListener
                     ACC_DATA[0] = se.values[0];
                     ACC_DATA[1] = se.values[1];
                     ACC_DATA[2] = se.values[2];
+                    break;
 
 //                    Log.d("ACC", String.valueOf(se.values[0])+", "+String.valueOf(se.values[1])+", "+String.valueOf(se.values[2]));
 
@@ -195,6 +216,7 @@ public class SensorService extends Service implements SensorEventListener
                     GYR_DATA[0] = se.values[0];
                     GYR_DATA[1] = se.values[1];
                     GYR_DATA[2] = se.values[2];
+                    break;
 
 
 
@@ -253,12 +275,12 @@ public class SensorService extends Service implements SensorEventListener
             try
             {
                 Toast.makeText(this, "Teheey", Toast.LENGTH_LONG).show();
-                bos.write("ACC\n".getBytes());
-                bos.write((Long.toString(timeInMillis)+"\n").getBytes());
-                bos.write(text_acc.getBytes());
-                bos.write("GYR\n".getBytes());
-                bos.write((Long.toString(timeInMillis)+"\n").getBytes());
-                bos.write(text_gyr.getBytes());
+                bos_acc.write("ACC\n".getBytes());
+                bos_acc.write((Long.toString(timeInMillis)+"\n").getBytes());
+                bos_acc.write(text_acc.getBytes());
+                bos_gyr.write("GYR\n".getBytes());
+                bos_gyr.write((Long.toString(timeInMillis)+"\n").getBytes());
+                bos_gyr.write(text_gyr.getBytes());
 //                bos.write("GRA\n".getBytes());
 //                bos.write(text_gra.getBytes());
             } catch (IOException e)
