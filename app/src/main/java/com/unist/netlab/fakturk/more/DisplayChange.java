@@ -19,14 +19,14 @@ public class DisplayChange
         this.tvAngle = tvAngle;
     }
 
-    void setDisplay(String ACC, String GYR, String LACC)
+    void setDisplay(String time, String ACC, String GYR, String LACC)
     {
 
         tv.setText("ACC : \n"+ACC+
                 "\n"+
                 "GYR : \n"+GYR
-//                "\n"+
-//                "LACC : \n"+LACC
+                +"\n"+
+                "time : \n"+time
         );
     }
 

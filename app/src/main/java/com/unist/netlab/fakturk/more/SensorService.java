@@ -54,20 +54,20 @@ public class SensorService extends Service implements SensorEventListener
 
     File sd = Environment.getExternalStorageDirectory();
     Calendar c = Calendar.getInstance();
-    String path = sd + "/" + "SensorData" +c.getTime()+ ".xml";
+    //String path = sd + "/" + "SensorData" +c.getTime()+ ".xml";
     String path_acc = sd + "/" + "SensorDataAcc" +c.getTime()+ ".xml";
     String path_gyr = sd + "/" + "SensorDataGyr" +c.getTime()+ ".xml";
 
 
-    String mDestXmlFilename=path;
+    //String mDestXmlFilename=path;
     String mDestXmlFilenameAcc=path_acc;
     String mDestXmlFilenameGyr=path_gyr;
 
 
-    File myFile = new File(mDestXmlFilename);
+    //File myFile = new File(mDestXmlFilename);
     File fileAcc = new File(mDestXmlFilenameAcc);
     File fileGyr = new File(mDestXmlFilenameGyr);
-    BufferedOutputStream bos;
+    //BufferedOutputStream bos;
     BufferedOutputStream bos_acc;
     BufferedOutputStream bos_gyr;
 
@@ -102,13 +102,13 @@ public class SensorService extends Service implements SensorEventListener
         FileOutputStream fOutGyr = null;
         try
         {
-            myFile.createNewFile();
+           // myFile.createNewFile();
             fileAcc.createNewFile();
             fileGyr.createNewFile();
-            fOut = new FileOutputStream(myFile);
+            //fOut = new FileOutputStream(myFile);
             fOutAcc = new FileOutputStream(fileAcc);
             fOutGyr = new FileOutputStream(fileGyr);
-            bos = new BufferedOutputStream(fOut);
+            //bos = new BufferedOutputStream(fOut);
             bos_acc = new BufferedOutputStream(fOutAcc);
             bos_gyr = new BufferedOutputStream(fOutGyr);
         }catch (FileNotFoundException e) {
@@ -159,7 +159,7 @@ public class SensorService extends Service implements SensorEventListener
         SM.unregisterListener(this);
         try
         {
-            bos.close();
+            //bos.close();
             bos_acc.close();
             bos_gyr.close();
         } catch (IOException e)
@@ -275,12 +275,12 @@ public class SensorService extends Service implements SensorEventListener
             try
             {
                 Toast.makeText(this, "Teheey", Toast.LENGTH_LONG).show();
-                bos_acc.write("ACC\n".getBytes());
-                bos_acc.write((Long.toString(timeInMillis)+"\n").getBytes());
-                bos_acc.write(text_acc.getBytes());
-                bos_gyr.write("GYR\n".getBytes());
-                bos_gyr.write((Long.toString(timeInMillis)+"\n").getBytes());
-                bos_gyr.write(text_gyr.getBytes());
+              //  bos_acc.write("ACC\n".getBytes());
+                bos_acc.write((Long.toString(timeInMillis)+" ").getBytes());
+                bos_acc.write((ACC_DATA[0]+" "+ACC_DATA[1]+" "+ACC_DATA[2]+"\n").getBytes());
+                //bos_gyr.write("GYR\n".getBytes());
+                bos_gyr.write((Long.toString(timeInMillis)+" ").getBytes());
+                bos_gyr.write((GYR_DATA[0]+" "+GYR_DATA[1]+" "+GYR_DATA[2]+"\n").getBytes());
 //                bos.write("GRA\n".getBytes());
 //                bos.write(text_gra.getBytes());
             } catch (IOException e)

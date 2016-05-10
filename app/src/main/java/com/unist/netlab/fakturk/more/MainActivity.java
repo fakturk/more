@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -17,11 +18,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
 import java.util.Vector;
 
 
@@ -112,7 +120,31 @@ public class MainActivity extends Activity
         lpf = new LowPassFilter();
         g= new Gravity();
 
+        File sd = Environment.getExternalStorageDirectory();
+        Calendar c = Calendar.getInstance();
+        String path_gra = sd + "/" + "SensorDataGravity" +c.getTime()+ ".xml";
 
+        String mDestXmlFilenameGra=path_gra;
+        final File fileGra = new File(mDestXmlFilenameGra);
+        BufferedOutputStream bos_gra = null;
+        FileOutputStream fOutGra = null;
+        try
+        {
+            // myFile.createNewFile();
+            fileGra.createNewFile();
+
+            fOutGra = new FileOutputStream(fileGra);
+
+            bos_gra = new BufferedOutputStream(fOutGra);
+
+        }catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        final BufferedOutputStream finalBos_gra = bos_gra;
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver()
                 {
@@ -123,7 +155,7 @@ public class MainActivity extends Activity
 
                         float[] temp = intent.getFloatArrayExtra("ACC_DATA");
                         //tempAcc.add(temp);
-                        displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"), intent.getStringExtra("LACC"));
+                        displayChange.setDisplay(intent.getStringExtra("TIME"),intent.getStringExtra("ACC"), intent.getStringExtra("GYR"), intent.getStringExtra("LACC"));
                         //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
 
                         if (noiseVarianceTimer > 0)
@@ -147,6 +179,18 @@ public class MainActivity extends Activity
                             }
 
                             gravity = g.calibrateGravity(totalGravity, sampleNumber);
+
+                            try
+                            {
+
+                                finalBos_gra.write((intent.getStringExtra("TIME")+" ").getBytes());
+                                finalBos_gra.write((gravity[0]+" "+gravity[1]+" "+gravity[2]+"\n").getBytes());
+
+                            } catch (IOException e)
+                            {
+                                e.printStackTrace();
+                            }
+
                             //gravity = gravity(tempAcc, gravity);
                             move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
                             //move.moveIt();
