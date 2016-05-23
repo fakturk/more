@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -18,18 +17,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Calendar;
 import java.util.Vector;
 
 
@@ -120,93 +112,98 @@ public class MainActivity extends Activity
         lpf = new LowPassFilter();
         g= new Gravity();
 
-        File sd = Environment.getExternalStorageDirectory();
-        Calendar c = Calendar.getInstance();
-        String path_gra = sd + "/" + "SensorDataGravity" +c.getTime()+ ".xml";
+//        File sd = Environment.getExternalStorageDirectory();
+//        Calendar c = Calendar.getInstance();
+//        String path_gra = sd + "/" + "SensorDataGravity" +c.getTime()+ ".xml";
+//
+//        String mDestXmlFilenameGra=path_gra;
+//        final File fileGra = new File(mDestXmlFilenameGra);
+//        BufferedOutputStream bos_gra = null;
+//        FileOutputStream fOutGra = null;
+//        try
+//        {
+//            // myFile.createNewFile();
+//            fileGra.createNewFile();
+//
+//            fOutGra = new FileOutputStream(fileGra);
+//
+//            bos_gra = new BufferedOutputStream(fOutGra);
+//
+//        }catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-        String mDestXmlFilenameGra=path_gra;
-        final File fileGra = new File(mDestXmlFilenameGra);
-        BufferedOutputStream bos_gra = null;
-        FileOutputStream fOutGra = null;
-        try
-        {
-            // myFile.createNewFile();
-            fileGra.createNewFile();
 
-            fOutGra = new FileOutputStream(fileGra);
-
-            bos_gra = new BufferedOutputStream(fOutGra);
-
-        }catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        final BufferedOutputStream finalBos_gra = bos_gra;
+//        final BufferedOutputStream finalBos_gra = bos_gra;
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver()
                 {
                     @Override
                     public void onReceive(Context context, Intent intent)
                     {
+                        move.moveIt(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
 
 
-                        float[] temp = intent.getFloatArrayExtra("ACC_DATA");
-                        //tempAcc.add(temp);
-                        displayChange.setDisplay(intent.getStringExtra("TIME"),intent.getStringExtra("ACC"), intent.getStringExtra("GYR"), intent.getStringExtra("LACC"));
-                        //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
 
-                        if (noiseVarianceTimer > 0)
-                        {
-
-                            lowPassAcc = lpf.lowPass(factor ,temp, lowPassAcc);
-                            noisyAcc.add(lowPassAcc);
-                            noiseVarianceTimer--;
-
-                            for (int j = 0; j < 3; j++)
-                            {
-                                totalGravity[j] += lowPassAcc[j];
-
-                            }
-
-                        } else
-                        {
-                            if (!isNoiseVarianceCalculated)
-                            {
-                                noiseVariance = stats.calculateNoiseVariance(noisyAcc);
-                            }
-
-                            gravity = g.calibrateGravity(totalGravity, sampleNumber);
-
-                            try
-                            {
-
-                                finalBos_gra.write((intent.getStringExtra("TIME")+" ").getBytes());
-                                finalBos_gra.write((gravity[0]+" "+gravity[1]+" "+gravity[2]+"\n").getBytes());
-
-                            } catch (IOException e)
-                            {
-                                e.printStackTrace();
-                            }
-
-                            //gravity = gravity(tempAcc, gravity);
-                            move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
-                            //move.moveIt();
-
-                            // alpha = move.rotateText(mdisp, alpha);
-                            float[][] temp2;
-                            temp2 = move.lyingMove(mdisp, oldAcc, oldVelocity, oldDistance, gravity);
-
-                            for (int i = 0; i < 3; i++)
-                            {
-                                oldAcc[i] = temp2[0][i];
-                                oldVelocity[i] = temp2[1][i];
-                                oldDistance[i] = temp2[2][i];
-                            }
-
-                        }
+//                        float[] temp = intent.getFloatArrayExtra("ACC_DATA");
+//                        long timeInMillis = (new Date()).getTime()
+//                                + (intent.getLongExtra("TIME", 0) - System.nanoTime()) / 1000000L;
+//                        //tempAcc.add(temp);
+//                        displayChange.setDisplay(intent.getStringExtra("ACC"), intent.getStringExtra("GYR"), intent.getStringExtra("LACC"));
+//                        //displayChange.setTvAngle(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
+//
+//                        lowPassAcc = lpf.lowPass(factor ,temp, lowPassAcc);
+//                        noisyAcc.add(lowPassAcc);
+//
+//                        for (int j = 0; j < 3; j++)
+//                        {
+//                            totalGravity[j] += lowPassAcc[j];
+//
+//                        }
+//                        if (noiseVarianceTimer > 0)
+//                        {
+//
+//                            noiseVarianceTimer--;
+//
+//
+//                        } else
+//                        {
+//                            if (!isNoiseVarianceCalculated)
+//                            {
+//                                noiseVariance = stats.calculateNoiseVariance(noisyAcc);
+//                            }
+//
+////                            gravity = g.calibrateGravity(totalGravity, sampleNumber);
+////                            gravity = g.gravity(noisyAcc, gravity);
+//
+////                            try
+////                            {
+////
+////                                finalBos_gra.write(((timeInMillis)+" ").getBytes());
+////                                finalBos_gra.write((gravity[0]+" "+gravity[1]+" "+gravity[2]+"\n").getBytes());
+////
+////                            } catch (IOException e)
+////                            {
+////                                e.printStackTrace();
+////                            }
+//
+//                            //gravity = gravity(tempAcc, gravity);
+////                            move = new Move(noiseVariance, intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"), gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
+//
+//                            // alpha = move.rotateText(mdisp, alpha);
+////                            float[][] temp2;
+////                            temp2 = move.lyingMove(mdisp, oldAcc, oldVelocity, oldDistance, gravity);
+////
+////                            for (int i = 0; i < 3; i++)
+////                            {
+////                                oldAcc[i] = temp2[0][i];
+////                                oldVelocity[i] = temp2[1][i];
+////                                oldDistance[i] = temp2[2][i];
+////                            }
+//
+//                        }
 
                     }
                 }, new IntentFilter(SensorService.ACTION_SENSOR_BROADCAST)

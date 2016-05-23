@@ -436,7 +436,7 @@ public class Move
 
         return oldRotation;
     }
-    public void moveIt()
+    public void moveIt(float[] ACC_DATA, float[] GYR_DATA)
     {
 
         String SD = "";
