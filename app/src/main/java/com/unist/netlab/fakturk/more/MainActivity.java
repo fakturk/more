@@ -46,6 +46,7 @@ public class MainActivity extends Activity
     //    Vector<float[]> tempAcc;
     float factor = 0.02f;
     int sampleNumber = 100;
+    int sampleSize=1000;
 
 
 
@@ -143,7 +144,22 @@ public class MainActivity extends Activity
                     @Override
                     public void onReceive(Context context, Intent intent)
                     {
-                        move.moveIt(intent.getFloatArrayExtra("ACC_DATA"), intent.getFloatArrayExtra("GYR_DATA"));
+                        float[] acc = intent.getFloatArrayExtra("ACC_DATA");
+                        float[] gyr = intent.getFloatArrayExtra("GYR_DATA");
+                        if (noisyAcc.size()<sampleSize)
+                        {
+                            noisyAcc.add(acc);
+                        }
+                        else
+                        {
+                            noisyAcc.remove(0);
+                            noisyAcc.add(acc);
+                        }
+
+                        gravity = g.gravity(noisyAcc, gravity);
+
+                        move = new Move(noiseVariance, acc, gyr, gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
+                        move.moveIt(acc, gyr);
 
 
 
