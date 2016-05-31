@@ -37,12 +37,12 @@ public class MainActivity extends Activity
     DisplayChange displayChange;
     Display mdisp;
     Double alpha;
-    float[] oldAcc, oldVelocity, oldDistance, gravity, lowPassAcc;
+    float[] oldAcc, oldVelocity, oldDistance, gravity, lowPassAcc, filteredGyr;
     int noiseVarianceTimer, gravityTimer;
     double noiseAverage;
     double[][] noiseVariance;
     boolean isNoiseVarianceCalculated = false;
-    Vector<float[]> noisyAcc;
+    Vector<float[]> noisyAcc, noisyGyr;
     //    Vector<float[]> tempAcc;
     float factor = 0.02f;
     int sampleNumber = 100;
@@ -51,7 +51,7 @@ public class MainActivity extends Activity
 
 
     StatisticCalculations stats;
-    LowPassFilter lpf;
+    Filter lpf;
     Gravity g;
 
 
@@ -100,17 +100,20 @@ public class MainActivity extends Activity
         oldVelocity = new float[3];
         oldDistance = new float[3];
         gravity = new float[3];
+
+        filteredGyr = new float[3];
         noiseVarianceTimer = sampleNumber;
         gravityTimer = sampleNumber;
         //noiseVariance=0;
         noiseAverage = 0;
 
         noisyAcc = new Vector<>();
+        noisyGyr = new Vector<>();
 
         final float[] totalGravity = new float[3];
 
         stats = new StatisticCalculations();
-        lpf = new LowPassFilter();
+        lpf = new Filter();
         g= new Gravity();
 
 //        File sd = Environment.getExternalStorageDirectory();
@@ -146,6 +149,7 @@ public class MainActivity extends Activity
                     {
                         float[] acc = intent.getFloatArrayExtra("ACC_DATA");
                         float[] gyr = intent.getFloatArrayExtra("GYR_DATA");
+                        float accMagnitude = (float) Math.pow((acc[0]*acc[0]+acc[1]*acc[1]+acc[2]*acc[2]),0.5);
                         if (noisyAcc.size()<sampleSize)
                         {
                             noisyAcc.add(acc);
@@ -155,8 +159,18 @@ public class MainActivity extends Activity
                             noisyAcc.remove(0);
                             noisyAcc.add(acc);
                         }
+                        if (noisyGyr.size()<sampleSize)
+                        {
+                            noisyGyr.add(gyr);
+                        }
+                        else
+                        {
+                            noisyGyr.remove(0);
+                            noisyGyr.add(gyr);
+                        }
 
                         gravity = g.gravity(noisyAcc, gravity);
+//                        filteredGyr = lpf.lowPass(0.05f,gyr,filteredGyr);
 
                         move = new Move(noiseVariance, acc, gyr, gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
                         move.moveIt(acc, gyr);
