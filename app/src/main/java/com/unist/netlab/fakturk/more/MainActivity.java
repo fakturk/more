@@ -149,6 +149,7 @@ public class MainActivity extends Activity
                     {
                         float[] acc = intent.getFloatArrayExtra("ACC_DATA");
                         float[] gyr = intent.getFloatArrayExtra("GYR_DATA");
+                        float[] mag = intent.getFloatArrayExtra("MAG_DATA");
                         float accMagnitude = (float) Math.pow((acc[0]*acc[0]+acc[1]*acc[1]+acc[2]*acc[2]),0.5);
                         if (noisyAcc.size()<sampleSize)
                         {
@@ -172,8 +173,8 @@ public class MainActivity extends Activity
                         gravity = g.gravity(noisyAcc, gravity);
 //                        filteredGyr = lpf.lowPass(0.05f,gyr,filteredGyr);
 
-                        move = new Move(noiseVariance, acc, gyr, gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
-                        move.moveIt(acc, gyr);
+                        move = new Move(noiseVariance, acc, gyr, mag, gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
+                        move.moveIt(acc, gyr, mag);
 
 
 

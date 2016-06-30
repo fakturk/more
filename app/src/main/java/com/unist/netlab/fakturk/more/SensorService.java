@@ -22,11 +22,12 @@ public class SensorService extends Service implements SensorEventListener
 
 
 //    private String text, text_acc="not catched\n", text_gyr="not catched\n", text_gra="not catched\n",text_lacc="not catched\n";
-    private String text, text_acc="", text_gyr="";
+    private String text, text_acc="", text_gyr="", text_mag="";
 
     SensorManager SM;
     float[] ACC_DATA=new float[3];
     float[] GYR_DATA=new float[3];
+    float[] MAG_DATA=new float[3];
 //    float[] GRA_DATA=new float[3];
     float[] LACC_DATA=new float[3];
 
@@ -115,6 +116,7 @@ public class SensorService extends Service implements SensorEventListener
 
         SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
         SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_FASTEST);
+        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_FASTEST);
        // SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_FASTEST);
 
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -211,6 +213,16 @@ public class SensorService extends Service implements SensorEventListener
                     GYR_DATA[2] = se.values[2];
                     break;
 
+                case Sensor.TYPE_MAGNETIC_FIELD :
+                    text_mag = "";
+                    text_mag += "X = " + se.values[0] + "\n";
+                    text_mag += "Y = " + se.values[1] + "\n";
+                    text_mag += "Z = " + se.values[2] + "\n";
+                    MAG_DATA[0] = se.values[0];
+                    MAG_DATA[1] = se.values[1];
+                    MAG_DATA[2] = se.values[2];
+                    break;
+
 
 
 //                case Sensor.TYPE_GRAVITY :
@@ -259,6 +271,7 @@ public class SensorService extends Service implements SensorEventListener
 
             intent.putExtra("ACC_DATA", ACC_DATA);
             intent.putExtra("GYR_DATA", GYR_DATA);
+            intent.putExtra("MAG_DATA", MAG_DATA);
 //            intent.putExtra("GRA_DATA", GRA_DATA);
             intent.putExtra("TIME",mSensorTimeStamp);
 //            intent.putExtra("LACC_DATA", LACC_DATA);
