@@ -8,6 +8,8 @@ import android.view.*;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
+
 import Jama.Matrix;
 
 import static android.util.FloatMath.cos;
@@ -21,6 +23,8 @@ public class Move
 {
 
     private static final float GRAVITY_EARTH = 9.80665f;
+    DecimalFormat df = new DecimalFormat("#.####");
+
     //SensorEvent se;
     TextView tv, tv2;
     TextView tvMain;
@@ -663,7 +667,7 @@ public class Move
         {
             for (int j=0; j<3; j++)
             {
-                SD += "d[" + (i*3+j) + "] : " + gyroMatrix[i*3+j] + ", ";
+                SD += "d[" + (i*3+j) + "] : " + df.format(gyroMatrix[i*3+j]) + ", ";
             }
             SD+="\n";
         }
@@ -674,8 +678,9 @@ public class Move
         tvAngle.setText("Inclination : "+inclination
                 +",\n Rotation : "+rotation
                 +",\n acc - g : "+(norm_Of_g - GRAVITY_EARTH)
-                +",\n gravity : "+(gravity[0]+", "+gravity[1]+", "+gravity[2])
-                +",\n"+SD);
+                +",\n gravity : "+(df.format(gravity[0])+", "+df.format(gravity[1])+", "+df.format(gravity[2]))
+                );
+        tv.setText(",\n"+SD);
 
 
 
@@ -776,8 +781,8 @@ public class Move
         double[][] R = {{rotationMatrix[0],rotationMatrix[1],rotationMatrix[2]},
                 {rotationMatrix[3],rotationMatrix[4],rotationMatrix[5]},
                 {rotationMatrix[6],rotationMatrix[7],rotationMatrix[8]}};
-        Matrix inverseRotation = new Matrix(R);
-        inverseRotation=inverseRotation.inverse();
+        Matrix Rotation = new Matrix(R);
+        Matrix inverseRotation=Rotation.inverse();
 
         noise[0] =  acc[0]-(float)(inverseRotation.get(0,2)*GRAVITY_EARTH);
         noise[1] =  acc[1]-(float)(inverseRotation.get(1,2)*GRAVITY_EARTH);
