@@ -626,7 +626,7 @@ public class Move
         // copy the new gyro values into the gyro array
         // convert the raw gyro data into a rotation vector
 
-
+        calculateAccMagOrientation(rotationMatrix,ACC_DATA,MAG_DATA,accMagOrientation);
 
         float FILTER_COEFFICIENT = 0.98f;
         float oneMinusCoeff = 1.0f - FILTER_COEFFICIENT;
