@@ -9,11 +9,18 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -46,24 +53,27 @@ public class SensorService extends Service implements SensorEventListener
 //    int id_To_Update = 0;
 
 
-//    File sd = Environment.getExternalStorageDirectory();
-//    Calendar c = Calendar.getInstance();
-//    //String path = sd + "/" + "SensorData" +c.getTime()+ ".xml";
-//    String path_acc = sd + "/" + "SensorDataAcc" +c.getTime()+ ".xml";
-//    String path_gyr = sd + "/" + "SensorDataGyr" +c.getTime()+ ".xml";
-//
-//
-//    //String mDestXmlFilename=path;
-//    String mDestXmlFilenameAcc=path_acc;
-//    String mDestXmlFilenameGyr=path_gyr;
-//
-//
-//    //File myFile = new File(mDestXmlFilename);
-//    File fileAcc = new File(mDestXmlFilenameAcc);
-//    File fileGyr = new File(mDestXmlFilenameGyr);
-//    //BufferedOutputStream bos;
-//    BufferedOutputStream bos_acc;
-//    BufferedOutputStream bos_gyr;
+    File sd = Environment.getExternalStorageDirectory();
+    Calendar c = Calendar.getInstance();
+    //String path = sd + "/" + "SensorData" +c.getTime()+ ".xml";
+    String path_acc = sd + "/" + "SensorDataAcc" +c.getTime()+ ".xml";
+    String path_gyr = sd + "/" + "SensorDataGyr" +c.getTime()+ ".xml";
+
+
+    //String mDestXmlFilename=path;
+    String mDestXmlFilenameAcc=path_acc;
+    String mDestXmlFilenameGyr=path_gyr;
+
+
+    //File myFile = new File(mDestXmlFilename);
+    File fileAcc = new File(mDestXmlFilenameAcc);
+    File fileGyr = new File(mDestXmlFilenameGyr);
+    //BufferedOutputStream bos;
+    BufferedOutputStream bos_acc;
+    BufferedOutputStream bos_gyr;
+
+    // I will write whole sensor readings on this srings and then before I close the files I write this strings to the files
+    String acc_string="", gyr_string="";
 
 
 
@@ -91,25 +101,25 @@ public class SensorService extends Service implements SensorEventListener
         SM = (SensorManager)getSystemService(SENSOR_SERVICE);
 
 
-//        FileOutputStream fOut = null;
-//        FileOutputStream fOutAcc = null;
-//        FileOutputStream fOutGyr = null;
-//        try
-//        {
-//           // myFile.createNewFile();
-//            fileAcc.createNewFile();
-//            fileGyr.createNewFile();
-//            //fOut = new FileOutputStream(myFile);
-//            fOutAcc = new FileOutputStream(fileAcc);
-//            fOutGyr = new FileOutputStream(fileGyr);
-//            //bos = new BufferedOutputStream(fOut);
-//            bos_acc = new BufferedOutputStream(fOutAcc);
-//            bos_gyr = new BufferedOutputStream(fOutGyr);
-//        }catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        FileOutputStream fOut = null;
+        FileOutputStream fOutAcc = null;
+        FileOutputStream fOutGyr = null;
+        try
+        {
+           // myFile.createNewFile();
+            fileAcc.createNewFile();
+            fileGyr.createNewFile();
+            //fOut = new FileOutputStream(myFile);
+            fOutAcc = new FileOutputStream(fileAcc);
+            fOutGyr = new FileOutputStream(fileGyr);
+            //bos = new BufferedOutputStream(fOut);
+            bos_acc = new BufferedOutputStream(fOutAcc);
+            bos_gyr = new BufferedOutputStream(fOutGyr);
+        }catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
 
@@ -152,15 +162,15 @@ public class SensorService extends Service implements SensorEventListener
         Toast.makeText(this, "Service Stopped", Toast.LENGTH_LONG).show();
 //        Log.d( LOG_TAG, "onDestroy" );
         SM.unregisterListener(this);
-//        try
-//        {
-//            //bos.close();
-//            bos_acc.close();
-//            bos_gyr.close();
-//        } catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
+        try
+        {
+            //bos.close();
+            bos_acc.close();
+            bos_gyr.close();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
         //super.onDestroy();
     }
@@ -277,22 +287,24 @@ public class SensorService extends Service implements SensorEventListener
 //            intent.putExtra("LACC_DATA", LACC_DATA);
 
 
-//
-//            try
-//            {
+
+            acc_string =Long.toString(timeInMillis)+" ";
+            acc_string +=(ACC_DATA[0]+" "+ACC_DATA[1]+" "+ACC_DATA[2]+"\n");
+
+            gyr_string = Long.toString(timeInMillis)+" ";
+            gyr_string += (GYR_DATA[0]+" "+GYR_DATA[1]+" "+GYR_DATA[2]+"\n");
+
+            try
+            {
 //                Toast.makeText(this, "Teheey", Toast.LENGTH_LONG).show();
-//              //  bos_acc.write("ACC\n".getBytes());
-//                bos_acc.write((Long.toString(timeInMillis)+" ").getBytes());
-//                bos_acc.write((ACC_DATA[0]+" "+ACC_DATA[1]+" "+ACC_DATA[2]+"\n").getBytes());
-//                //bos_gyr.write("GYR\n".getBytes());
-//                bos_gyr.write((Long.toString(timeInMillis)+" ").getBytes());
-//                bos_gyr.write((GYR_DATA[0]+" "+GYR_DATA[1]+" "+GYR_DATA[2]+"\n").getBytes());
-////                bos.write("GRA\n".getBytes());
-////                bos.write(text_gra.getBytes());
-//            } catch (IOException e)
-//            {
-//                e.printStackTrace();
-//            }
+              //  bos_acc.write("ACC\n".getBytes());
+                bos_acc.write(acc_string.getBytes());
+                bos_gyr.write(gyr_string.getBytes());
+//
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
     }

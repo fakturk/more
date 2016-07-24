@@ -32,7 +32,7 @@ public class MainActivity extends Activity
     TextView tv, tv2;
     TextView tvMain;
     TextView tvAngle;
-    Button buttonUp, buttonDown, buttonReset, buttonCalibrate;
+    Button buttonUp, buttonDown, buttonReset, buttonCalibrate, buttonStart;
     Move move;
     DisplayChange displayChange;
     Display mdisp;
@@ -92,6 +92,7 @@ public class MainActivity extends Activity
         buttonDown = (Button) findViewById(R.id.buttonSizeDown);
         buttonReset = (Button) findViewById(R.id.buttonReset);
         buttonCalibrate = (Button) findViewById(R.id.buttonCalibrate);
+        buttonStart = (Button) findViewById(R.id.button_start);
         displayChange = new DisplayChange(tv, tvAngle);
         mdisp = getWindowManager().getDefaultDisplay();
         alpha = 0.0;
@@ -173,8 +174,8 @@ public class MainActivity extends Activity
                         gravity = g.gravity(noisyAcc, gravity);
 //                        filteredGyr = lpf.lowPass(0.05f,gyr,filteredGyr);
 
-                        move = new Move(noiseVariance, acc, gyr, mag, gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
-                        move.moveIt(acc, gyr, mag);
+//                        move = new Move(noiseVariance, acc, gyr, mag, gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);
+//                        move.moveIt(acc, gyr, mag);
 
 
 
@@ -303,6 +304,23 @@ public class MainActivity extends Activity
             }
         });
 
+        buttonStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (buttonStart.getText().equals("Start")) {
+                    buttonStart.setText("Stop");
+                    startService(new Intent(MainActivity.this,SensorService.class));
+                }
+                else
+                {
+                    buttonStart.setText("Start");
+                    stopService(new Intent(MainActivity.this,SensorService.class));
+                }
+            }
+        });
+
+
+
 //
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -334,7 +352,7 @@ public class MainActivity extends Activity
     {
 
         super.onResume();
-        startService(new Intent(this, SensorService.class));
+//        startService(new Intent(this, SensorService.class));
     }
 
 
