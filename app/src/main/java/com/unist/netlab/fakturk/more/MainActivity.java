@@ -151,27 +151,27 @@ public class MainActivity extends Activity
                         float[] acc = intent.getFloatArrayExtra("ACC_DATA");
                         float[] gyr = intent.getFloatArrayExtra("GYR_DATA");
                         float[] mag = intent.getFloatArrayExtra("MAG_DATA");
-                        float accMagnitude = (float) Math.pow((acc[0]*acc[0]+acc[1]*acc[1]+acc[2]*acc[2]),0.5);
-                        if (noisyAcc.size()<sampleSize)
-                        {
-                            noisyAcc.add(acc);
-                        }
-                        else
-                        {
-                            noisyAcc.remove(0);
-                            noisyAcc.add(acc);
-                        }
-                        if (noisyGyr.size()<sampleSize)
-                        {
-                            noisyGyr.add(gyr);
-                        }
-                        else
-                        {
-                            noisyGyr.remove(0);
-                            noisyGyr.add(gyr);
-                        }
-
-                        gravity = g.gravity(noisyAcc, gravity);
+//                        float accMagnitude = (float) Math.pow((acc[0]*acc[0]+acc[1]*acc[1]+acc[2]*acc[2]),0.5);
+//                        if (noisyAcc.size()<sampleSize)
+//                        {
+//                            noisyAcc.add(acc);
+//                        }
+//                        else
+//                        {
+//                            noisyAcc.remove(0);
+//                            noisyAcc.add(acc);
+//                        }
+//                        if (noisyGyr.size()<sampleSize)
+//                        {
+//                            noisyGyr.add(gyr);
+//                        }
+//                        else
+//                        {
+//                            noisyGyr.remove(0);
+//                            noisyGyr.add(gyr);
+//                        }
+//
+//                        gravity = g.gravity(noisyAcc, gravity);
 //                        filteredGyr = lpf.lowPass(0.05f,gyr,filteredGyr);
 
 //                        move = new Move(noiseVariance, acc, gyr, mag, gravity, intent.getLongExtra("TIME", 0), mdisp, tv, tv2, tvMain, tvAngle, root);

@@ -22,11 +22,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
 
 
 public class SensorService extends Service implements SensorEventListener
 {
 
+
+    Timer timer = new Timer();
 
 //    private String text, text_acc="not catched\n", text_gyr="not catched\n", text_gra="not catched\n",text_lacc="not catched\n";
     private String text, text_acc="", text_gyr="", text_mag="";
@@ -43,6 +46,8 @@ public class SensorService extends Service implements SensorEventListener
     static final String LOG_TAG = "SimpleService";
 
     long mSensorTimeStamp;
+
+    SensorEvent cached;
 
 //    Intent intent = new Intent(SensorService.this, MainActivity.class);
 //    NotificationCompat.Builder mCompatBuilder;
@@ -78,15 +83,19 @@ public class SensorService extends Service implements SensorEventListener
 
 
 
-
     @Override
     public void onSensorChanged(SensorEvent se)
     {
 //        Log.d(LOG_TAG, "onSensorChanged");
 //
         sendBroadcastMessage(se);
+//        cached = se;
 
     }
+
+
+
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i)
@@ -124,8 +133,8 @@ public class SensorService extends Service implements SensorEventListener
 
 
 
-        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
-        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_FASTEST);
+        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), 10);
+        SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE), 10);
         SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_FASTEST);
        // SM.registerListener(this, SM.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_FASTEST);
 
@@ -143,6 +152,8 @@ public class SensorService extends Service implements SensorEventListener
         Notification barNotif = bBuilder.build();
         this.startForeground(1, barNotif);
 
+
+
         return SensorService.START_STICKY;
     }
 
@@ -151,6 +162,15 @@ public class SensorService extends Service implements SensorEventListener
         //super.onCreate();
         Toast.makeText(this, "Service Created", Toast.LENGTH_LONG).show();
         //Log.d(LOG_TAG, "onStartCommand");
+
+//        timer.scheduleAtFixedRate(new TimerTask()
+//        {
+//            @Override
+//            public void run()
+//            {
+//                sendBroadcastMessage(cached);
+//            }
+//        }, 0, 20);
 
 
 
@@ -193,7 +213,10 @@ public class SensorService extends Service implements SensorEventListener
             Intent intent = new Intent(ACTION_SENSOR_BROADCAST);
             //float[] entries = new float[9];
 
-
+            mSensorTimeStamp = se.timestamp;
+            long timeInMillis = (new Date()).getTime()
+                    + (mSensorTimeStamp - System.nanoTime()) / 1000000L;
+            intent.putExtra("TIME",mSensorTimeStamp);
 
             switch(se.sensor.getType()){
                 case Sensor.TYPE_ACCELEROMETER :
@@ -204,6 +227,21 @@ public class SensorService extends Service implements SensorEventListener
                     ACC_DATA[0] = se.values[0];
                     ACC_DATA[1] = se.values[1];
                     ACC_DATA[2] = se.values[2];
+
+                    acc_string =Long.toString(timeInMillis)+" ";
+                    acc_string +=(ACC_DATA[0]+" "+ACC_DATA[1]+" "+ACC_DATA[2]+"\n");
+
+                    intent.putExtra("ACC", text_acc);
+                    intent.putExtra("ACC_DATA", ACC_DATA);
+
+                    try
+                    {
+                        bos_acc.write(acc_string.getBytes());
+
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
                     break;
 
 //                    Log.d("ACC", String.valueOf(se.values[0])+", "+String.valueOf(se.values[1])+", "+String.valueOf(se.values[2]));
@@ -221,6 +259,24 @@ public class SensorService extends Service implements SensorEventListener
                     GYR_DATA[0] = se.values[0];
                     GYR_DATA[1] = se.values[1];
                     GYR_DATA[2] = se.values[2];
+
+
+                    gyr_string = Long.toString(timeInMillis)+" ";
+                    gyr_string += (GYR_DATA[0]+" "+GYR_DATA[1]+" "+GYR_DATA[2]+"\n");
+
+                    intent.putExtra("GYR", text_gyr);
+
+                    intent.putExtra("GYR_DATA", GYR_DATA);
+
+                    try
+                    {
+
+                        bos_gyr.write(gyr_string.getBytes());
+
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
                     break;
 
                 case Sensor.TYPE_MAGNETIC_FIELD :
@@ -270,41 +326,22 @@ public class SensorService extends Service implements SensorEventListener
 //            Log.d("ACC_DATA", String.valueOf(ACC_DATA[0])+", "+String.valueOf(ACC_DATA[1])+", "+String.valueOf(ACC_DATA[2])+", ");
 
 
-            mSensorTimeStamp = se.timestamp;
-            long timeInMillis = (new Date()).getTime()
-                    + (mSensorTimeStamp - System.nanoTime()) / 1000000L;
-
-            intent.putExtra("ACC", text_acc);
-//            intent.putExtra("LACC", text_lacc);
-            intent.putExtra("GYR", text_gyr);
-//            intent.putExtra("GRA", text_gra);
-
-            intent.putExtra("ACC_DATA", ACC_DATA);
-            intent.putExtra("GYR_DATA", GYR_DATA);
-            intent.putExtra("MAG_DATA", MAG_DATA);
-//            intent.putExtra("GRA_DATA", GRA_DATA);
-            intent.putExtra("TIME",mSensorTimeStamp);
-//            intent.putExtra("LACC_DATA", LACC_DATA);
 
 
 
-            acc_string =Long.toString(timeInMillis)+" ";
-            acc_string +=(ACC_DATA[0]+" "+ACC_DATA[1]+" "+ACC_DATA[2]+"\n");
 
-            gyr_string = Long.toString(timeInMillis)+" ";
-            gyr_string += (GYR_DATA[0]+" "+GYR_DATA[1]+" "+GYR_DATA[2]+"\n");
 
-            try
-            {
-//                Toast.makeText(this, "Teheey", Toast.LENGTH_LONG).show();
-              //  bos_acc.write("ACC\n".getBytes());
-                bos_acc.write(acc_string.getBytes());
-                bos_gyr.write(gyr_string.getBytes());
+//            intent.putExtra("MAG_DATA", MAG_DATA);
+////            intent.putExtra("GRA_DATA", GRA_DATA);
 //
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+////            intent.putExtra("LACC_DATA", LACC_DATA);
+
+
+
+
+
+
+
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
     }
