@@ -376,20 +376,6 @@ public class Move
 
     }
 
-    protected float[] lowPass( float[] input, float[] output ) {
-        if ( output == null ) return input;
-        for ( int i=0; i<input.length; i++ ) {
-            output[i] = output[i] + factor * (input[i] - output[i]);
-        }
-        return output;
-    }
-    protected float[] highPass( float[] input, float[] output ) {
-        if ( output == null ) return input;
-        for ( int i=0; i<input.length; i++ ) {
-            output[i] = output[i] + factor * (input[i] - output[i]);
-        }
-        return output;
-    }
 
     public double rotateText(Display mdisp, double oldRotation)
     {

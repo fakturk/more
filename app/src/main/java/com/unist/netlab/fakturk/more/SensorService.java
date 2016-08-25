@@ -17,9 +17,6 @@ import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
@@ -110,25 +107,25 @@ public class SensorService extends Service implements SensorEventListener
         SM = (SensorManager)getSystemService(SENSOR_SERVICE);
 
 
-        FileOutputStream fOut = null;
-        FileOutputStream fOutAcc = null;
-        FileOutputStream fOutGyr = null;
-        try
-        {
-           // myFile.createNewFile();
-            fileAcc.createNewFile();
-            fileGyr.createNewFile();
-            //fOut = new FileOutputStream(myFile);
-            fOutAcc = new FileOutputStream(fileAcc);
-            fOutGyr = new FileOutputStream(fileGyr);
-            //bos = new BufferedOutputStream(fOut);
-            bos_acc = new BufferedOutputStream(fOutAcc);
-            bos_gyr = new BufferedOutputStream(fOutGyr);
-        }catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        FileOutputStream fOut = null;
+//        FileOutputStream fOutAcc = null;
+//        FileOutputStream fOutGyr = null;
+//        try
+//        {
+//           // myFile.createNewFile();
+//            fileAcc.createNewFile();
+//            fileGyr.createNewFile();
+//            //fOut = new FileOutputStream(myFile);
+//            fOutAcc = new FileOutputStream(fileAcc);
+//            fOutGyr = new FileOutputStream(fileGyr);
+//            //bos = new BufferedOutputStream(fOut);
+//            bos_acc = new BufferedOutputStream(fOutAcc);
+//            bos_gyr = new BufferedOutputStream(fOutGyr);
+//        }catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
 
 
@@ -182,15 +179,15 @@ public class SensorService extends Service implements SensorEventListener
         Toast.makeText(this, "Service Stopped", Toast.LENGTH_LONG).show();
 //        Log.d( LOG_TAG, "onDestroy" );
         SM.unregisterListener(this);
-        try
-        {
-            //bos.close();
-            bos_acc.close();
-            bos_gyr.close();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+//        try
+//        {
+//            //bos.close();
+//            bos_acc.close();
+//            bos_gyr.close();
+//        } catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
 
         //super.onDestroy();
     }
@@ -233,15 +230,15 @@ public class SensorService extends Service implements SensorEventListener
 
                     intent.putExtra("ACC", text_acc);
                     intent.putExtra("ACC_DATA", ACC_DATA);
-
-                    try
-                    {
-                        bos_acc.write(acc_string.getBytes());
-
-                    } catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
+//
+//                    try
+//                    {
+//                        bos_acc.write(acc_string.getBytes());
+//
+//                    } catch (IOException e)
+//                    {
+//                        e.printStackTrace();
+//                    }
                     break;
 
 //                    Log.d("ACC", String.valueOf(se.values[0])+", "+String.valueOf(se.values[1])+", "+String.valueOf(se.values[2]));
@@ -268,15 +265,15 @@ public class SensorService extends Service implements SensorEventListener
 
                     intent.putExtra("GYR_DATA", GYR_DATA);
 
-                    try
-                    {
-
-                        bos_gyr.write(gyr_string.getBytes());
-
-                    } catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
+//                    try
+//                    {
+//
+//                        bos_gyr.write(gyr_string.getBytes());
+//
+//                    } catch (IOException e)
+//                    {
+//                        e.printStackTrace();
+//                    }
                     break;
 
                 case Sensor.TYPE_MAGNETIC_FIELD :

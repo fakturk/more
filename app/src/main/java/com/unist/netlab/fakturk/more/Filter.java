@@ -31,6 +31,9 @@ public class Filter {
         return output;
     }
 
+    // recursive low pass filter
+    // y[n] = a0*x[n] + b1*y[n-1]
+    // a0 = 1-alpha, b1 = alpha
     protected float[] recursivelowPass(float factor, float[] input, float[] output)
     {
         float a0=1-factor;
@@ -45,6 +48,9 @@ public class Filter {
         return output;
     }
 
+    // recursive high pass filter
+    // y[n] = a0*x[n] + a1*x[n-1]  + b1*y[n-1]
+    // a0 = (1+alpha)/2, a1 = -(1+alpha)/2, b1 = alpha
     protected float[] recursivehighPass(float factor, float[] input,float[] inputOld, float[] output)
     {
         float a0=(1+factor)/2;

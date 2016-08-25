@@ -22,6 +22,7 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.Arrays;
 import java.util.Vector;
 
 
@@ -37,7 +38,7 @@ public class MainActivity extends Activity
     DisplayChange displayChange;
     Display mdisp;
     Double alpha;
-    float[] oldAcc, oldVelocity, oldDistance, gravity, lowPassAcc, filteredGyr;
+    float[] oldAcc, oldVelocity, oldDistance, gravity, lowPassAcc, filteredGyr, processedAcc;
     int noiseVarianceTimer, gravityTimer;
     double noiseAverage;
     double[][] noiseVariance;
@@ -53,6 +54,7 @@ public class MainActivity extends Activity
     StatisticCalculations stats;
     Filter lpf;
     Gravity g;
+    AccProcess process;
 
 
 
@@ -101,6 +103,9 @@ public class MainActivity extends Activity
         oldVelocity = new float[3];
         oldDistance = new float[3];
         gravity = new float[3];
+        processedAcc = new float[21];
+        Arrays.fill(processedAcc,0);
+
 
         filteredGyr = new float[3];
         noiseVarianceTimer = sampleNumber;
@@ -116,6 +121,7 @@ public class MainActivity extends Activity
         stats = new StatisticCalculations();
         lpf = new Filter();
         g= new Gravity();
+        process = new AccProcess();
 
 //        File sd = Environment.getExternalStorageDirectory();
 //        Calendar c = Calendar.getInstance();
@@ -151,6 +157,14 @@ public class MainActivity extends Activity
                         float[] acc = intent.getFloatArrayExtra("ACC_DATA");
                         float[] gyr = intent.getFloatArrayExtra("GYR_DATA");
                         float[] mag = intent.getFloatArrayExtra("MAG_DATA");
+                        if (acc!=null)
+                        {
+                            processedAcc = process.processedData(acc,processedAcc);
+                            tvMain.setText( Float.toString(processedAcc[15])+", "+Float.toString(processedAcc[16])+", "+Float.toString(processedAcc[17])+"\n"
+                                        +   Float.toString(processedAcc[18])+", "+Float.toString(processedAcc[19])+", "+Float.toString(processedAcc[20])+"\n");
+                        }
+
+
 //                        float accMagnitude = (float) Math.pow((acc[0]*acc[0]+acc[1]*acc[1]+acc[2]*acc[2]),0.5);
 //                        if (noisyAcc.size()<sampleSize)
 //                        {
