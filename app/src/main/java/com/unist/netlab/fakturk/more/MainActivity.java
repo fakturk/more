@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -22,13 +23,21 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Vector;
 
 
 public class MainActivity extends Activity
 {
 
+    DecimalFormat df = new DecimalFormat("#.##");
     //SensorManager SM;
     TextView tv, tv2;
     TextView tvMain;
@@ -48,7 +57,15 @@ public class MainActivity extends Activity
     float factor = 0.02f;
     int sampleNumber = 100;
     int sampleSize=1000;
+    String processedAccData, processedAccDataforFile;
 
+    FileOutputStream fOut = null;
+    File sd = Environment.getExternalStorageDirectory();
+    Calendar c = Calendar.getInstance();
+    String path = sd + "/" + "ProcessedAccData" +c.getTime()+ ".xml";
+    String mDestXmlFilename=path;
+    File myFile = new File(mDestXmlFilename);
+    BufferedOutputStream bos;
 
 
     StatisticCalculations stats;
@@ -103,8 +120,8 @@ public class MainActivity extends Activity
         oldVelocity = new float[3];
         oldDistance = new float[3];
         gravity = new float[3];
-        processedAcc = new float[21];
-        Arrays.fill(processedAcc,0);
+        processedAcc = null;
+        //Arrays.fill(processedAcc,0);
 
 
         filteredGyr = new float[3];
@@ -123,31 +140,7 @@ public class MainActivity extends Activity
         g= new Gravity();
         process = new AccProcess();
 
-//        File sd = Environment.getExternalStorageDirectory();
-//        Calendar c = Calendar.getInstance();
-//        String path_gra = sd + "/" + "SensorDataGravity" +c.getTime()+ ".xml";
-//
-//        String mDestXmlFilenameGra=path_gra;
-//        final File fileGra = new File(mDestXmlFilenameGra);
-//        BufferedOutputStream bos_gra = null;
-//        FileOutputStream fOutGra = null;
-//        try
-//        {
-//            // myFile.createNewFile();
-//            fileGra.createNewFile();
-//
-//            fOutGra = new FileOutputStream(fileGra);
-//
-//            bos_gra = new BufferedOutputStream(fOutGra);
-//
-//        }catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
 
-
-//        final BufferedOutputStream finalBos_gra = bos_gra;
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver()
                 {
@@ -160,8 +153,31 @@ public class MainActivity extends Activity
                         if (acc!=null)
                         {
                             processedAcc = process.processedData(acc,processedAcc);
-                            tvMain.setText( Float.toString(processedAcc[15])+", "+Float.toString(processedAcc[16])+", "+Float.toString(processedAcc[17])+"\n"
-                                        +   Float.toString(processedAcc[18])+", "+Float.toString(processedAcc[19])+", "+Float.toString(processedAcc[20])+"\n");
+                            processedAccData = df.format(processedAcc[0])+", "+df.format(processedAcc[1])+", "+df.format(processedAcc[2])+"\n"
+                                    +   df.format(processedAcc[3])+", "+df.format(processedAcc[4])+", "+df.format(processedAcc[5])+"\n"
+                                    +   df.format(processedAcc[6])+", "+df.format(processedAcc[7])+", "+df.format(processedAcc[8])+"\n"
+                                    +   df.format(processedAcc[9])+", "+df.format(processedAcc[10])+", "+df.format(processedAcc[11])+"\n"
+                                    +   df.format(processedAcc[12])+", "+df.format(processedAcc[13])+", "+df.format(processedAcc[14])+"\n"
+                                    +   df.format(processedAcc[15])+", "+df.format(processedAcc[16])+", "+df.format(processedAcc[17])+"\n"
+                                    +   df.format(processedAcc[18])+", "+df.format(processedAcc[19])+", "+df.format(processedAcc[20])+"\n";
+
+                            processedAccDataforFile = df.format(processedAcc[0])+", "+df.format(processedAcc[1])+", "+df.format(processedAcc[2])+", "
+                                    +   df.format(processedAcc[3])+", "+df.format(processedAcc[4])+", "+df.format(processedAcc[5])+", "
+                                    +   df.format(processedAcc[6])+", "+df.format(processedAcc[7])+", "+df.format(processedAcc[8])+", "
+                                    +   df.format(processedAcc[9])+", "+df.format(processedAcc[10])+", "+df.format(processedAcc[11])+", "
+                                    +   df.format(processedAcc[12])+", "+df.format(processedAcc[13])+", "+df.format(processedAcc[14])+", "
+                                    +   df.format(processedAcc[15])+", "+df.format(processedAcc[16])+", "+df.format(processedAcc[17])+", "
+                                    +   df.format(processedAcc[18])+", "+df.format(processedAcc[19])+", "+df.format(processedAcc[20])+"\n";
+
+                            tvMain.setText(processedAccData) ;
+                            try
+                            {
+                                bos.write(processedAccDataforFile.getBytes());
+
+                            } catch (IOException e)
+                            {
+                                e.printStackTrace();
+                            }
                         }
 
 
@@ -303,6 +319,7 @@ public class MainActivity extends Activity
                 tvMain.setY(530);
                 noiseVarianceTimer = sampleNumber;
                 noisyAcc.clear();
+                processedAcc = null;
             }
         });
 
@@ -315,6 +332,7 @@ public class MainActivity extends Activity
                 noiseVarianceTimer = sampleNumber;
                 noisyAcc.clear();
                 gravity = g.calibrateGravity(totalGravity, sampleNumber);
+                processedAcc = null;
             }
         });
 
@@ -324,11 +342,35 @@ public class MainActivity extends Activity
                 if (buttonStart.getText().equals("Start")) {
                     buttonStart.setText("Stop");
                     startService(new Intent(MainActivity.this,SensorService.class));
+                    FileOutputStream fOut = null;
+
+                    try
+                    {
+                        myFile.createNewFile();
+
+                        fOut = new FileOutputStream(myFile);
+
+                        bos = new BufferedOutputStream(fOut);
+
+                    }catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 else
                 {
                     buttonStart.setText("Start");
                     stopService(new Intent(MainActivity.this,SensorService.class));
+                    try
+                      {
+                        bos.close();
+
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+
                 }
             }
         });

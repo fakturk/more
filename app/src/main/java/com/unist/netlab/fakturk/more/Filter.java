@@ -63,6 +63,7 @@ public class Filter {
             output[i] = a0*input[i]+a1*inputOld[i]+ b1*output[i];
         }
 
+
         return output;
     }
 
