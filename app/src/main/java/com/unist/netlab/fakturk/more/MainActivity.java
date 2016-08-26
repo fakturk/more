@@ -29,7 +29,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Vector;
 
@@ -153,21 +152,21 @@ public class MainActivity extends Activity
                         if (acc!=null)
                         {
                             processedAcc = process.processedData(acc,processedAcc);
-                            processedAccData = df.format(processedAcc[0])+", "+df.format(processedAcc[1])+", "+df.format(processedAcc[2])+"\n"
-                                    +   df.format(processedAcc[3])+", "+df.format(processedAcc[4])+", "+df.format(processedAcc[5])+"\n"
-                                    +   df.format(processedAcc[6])+", "+df.format(processedAcc[7])+", "+df.format(processedAcc[8])+"\n"
-                                    +   df.format(processedAcc[9])+", "+df.format(processedAcc[10])+", "+df.format(processedAcc[11])+"\n"
-                                    +   df.format(processedAcc[12])+", "+df.format(processedAcc[13])+", "+df.format(processedAcc[14])+"\n"
-                                    +   df.format(processedAcc[15])+", "+df.format(processedAcc[16])+", "+df.format(processedAcc[17])+"\n"
-                                    +   df.format(processedAcc[18])+", "+df.format(processedAcc[19])+", "+df.format(processedAcc[20])+"\n";
+                            processedAccData = "Acc : "+df.format(processedAcc[0])+", "+df.format(processedAcc[1])+", "+df.format(processedAcc[2])+"\n"
+                                    +"Dif : "+   df.format(processedAcc[3])+", "+df.format(processedAcc[4])+", "+df.format(processedAcc[5])+"\n"
+                                    +"Vel : "+   df.format(processedAcc[6])+", "+df.format(processedAcc[7])+", "+df.format(processedAcc[8])+"\n"
+                                    +"hpVel : "+   df.format(processedAcc[9])+", "+df.format(processedAcc[10])+", "+df.format(processedAcc[11])+"\n"
+                                    +"lphpVel : "+   df.format(processedAcc[12])+", "+df.format(processedAcc[13])+", "+df.format(processedAcc[14])+"\n"
+                                    +"Dist : "+   df.format(processedAcc[15])+", "+df.format(processedAcc[16])+", "+df.format(processedAcc[17])+"\n"
+                                    +"hpDist : "+   df.format(processedAcc[18])+", "+df.format(processedAcc[19])+", "+df.format(processedAcc[20])+"\n";
 
-                            processedAccDataforFile = df.format(processedAcc[0])+", "+df.format(processedAcc[1])+", "+df.format(processedAcc[2])+", "
-                                    +   df.format(processedAcc[3])+", "+df.format(processedAcc[4])+", "+df.format(processedAcc[5])+", "
-                                    +   df.format(processedAcc[6])+", "+df.format(processedAcc[7])+", "+df.format(processedAcc[8])+", "
-                                    +   df.format(processedAcc[9])+", "+df.format(processedAcc[10])+", "+df.format(processedAcc[11])+", "
-                                    +   df.format(processedAcc[12])+", "+df.format(processedAcc[13])+", "+df.format(processedAcc[14])+", "
-                                    +   df.format(processedAcc[15])+", "+df.format(processedAcc[16])+", "+df.format(processedAcc[17])+", "
-                                    +   df.format(processedAcc[18])+", "+df.format(processedAcc[19])+", "+df.format(processedAcc[20])+"\n";
+                            processedAccDataforFile = (processedAcc[0])+" "+(processedAcc[1])+" "+(processedAcc[2])+" "
+                                    +   (processedAcc[3])+" "+(processedAcc[4])+" "+(processedAcc[5])+" "
+                                    +   (processedAcc[6])+" "+(processedAcc[7])+" "+(processedAcc[8])+" "
+                                    +   (processedAcc[9])+" "+(processedAcc[10])+" "+(processedAcc[11])+" "
+                                    +   (processedAcc[12])+" "+(processedAcc[13])+" "+(processedAcc[14])+" "
+                                    +   (processedAcc[15])+" "+(processedAcc[16])+" "+(processedAcc[17])+" "
+                                    +   (processedAcc[18])+" "+(processedAcc[19])+" "+(processedAcc[20])+"\n";
 
                             tvMain.setText(processedAccData) ;
                             try

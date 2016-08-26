@@ -1,5 +1,7 @@
 package com.unist.netlab.fakturk.more;
 
+import android.util.Log;
+
 /**
  * Created by fakturk on 8/25/16.
  * this class takes raw accelerometer readings as input and process this acc data and return results
@@ -80,10 +82,11 @@ public class AccProcess
 
 
         difference = takeDifference(input,oldAcc,oldDifference);
-        velocity = velocityByDelta(oldVelocity,difference);
+        velocity = velocityByDelta(difference,oldVelocity);
         hpVelocity = f.recursivehighPass(alpha,velocity,oldVelocity,oldhpVelocity);
         lphpVelocity = f.recursivelowPass(alpha,hpVelocity,oldlphpVelocity);
         distance = distance(lphpVelocity, oldDistance);
+        Log.d("hpDistance","alpha : "+alpha+" , distance :"+distance[0]+" , oldDistance : "+oldDistance[0]+" ,oldhpDistance"+oldhpDistance[0]);
         hpDistance = f.recursivehighPass(alpha,distance, oldDistance,oldhpDistance);
 
 
@@ -120,24 +123,27 @@ public class AccProcess
 
     // finds velocity by delta function
     // y[n] = y[n-1] + x[n]*0.01
-    float[] velocityByDelta(float[] input, float[] output)
+    float[] velocityByDelta(float[] difference, float[] oldVelocity)
     {
-        for (int i = 0; i < output.length; i++)
+        float[] velocity = new float[3];
+        for (int i = 0; i < oldVelocity.length; i++)
         {
-            output[i] = output[i] + input[i]*0.01f;
+            velocity[i] = oldVelocity[i] + difference[i]*0.01f;
         }
-        return output;
+        return velocity;
     }
 
     // finds distance by integrating velocity
     //y[n] = y[n-1]+x[n]*0.01
-    float[] distance(float[] input, float[] output)
+    float[] distance(float[] velocity, float[] oldDistance)
     {
-        for (int i = 0; i < output.length; i++)
+        float[] distance = new float[3];
+        for (int i = 0; i < oldVelocity.length; i++)
         {
-            output[i] = output[i] + input[i]*0.01f;
+            distance[i] = oldDistance[i] + velocity[i];
+
         }
-        return output;
+        return distance;
     }
 
 

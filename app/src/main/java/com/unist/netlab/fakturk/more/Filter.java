@@ -1,5 +1,7 @@
 package com.unist.netlab.fakturk.more;
 
+import android.util.Log;
+
 /**
  * Created by fakturk on 16. 5. 2.
  */
@@ -39,7 +41,7 @@ public class Filter {
         float a0=1-factor;
         float b1  = factor;
 
-//        if (output == null) return input;
+        if (output == null) return input;
         for (int i = 0; i < input.length; i++)
         {
             output[i] = a0*input[i]+ b1*output[i];
@@ -56,8 +58,11 @@ public class Filter {
         float a0=(1+factor)/2;
         float a1 = -(1+factor)/2;
         float b1  = factor;
+        Log.d("katsayi","a0 = "+a0+", a1 = "+a1+" ,b1 = "+b1);
+        Log.d("carpilmis","a0*input[i] :"+a0*input[0]+" ,a1*inputOld[i] : "+a1*inputOld[0]+" , b1*output[i] : "+b1*output[0]);
+        Log.d("total", "output[i] : "+(a0*input[0]+a1*inputOld[0]+ b1*output[0]));
 
-//        if (output == null) return input;
+        if (output == null) return input;
         for (int i = 0; i < input.length; i++)
         {
             output[i] = a0*input[i]+a1*inputOld[i]+ b1*output[i];
