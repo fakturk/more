@@ -46,7 +46,7 @@ public class MainActivity extends Activity
     DisplayChange displayChange;
     Display mdisp;
     Double alpha;
-    float[] oldAcc, oldVelocity, oldDistance, oldGyr, gravity, lowPassAcc, filteredGyr, processedAcc, dynamicAcc;
+    float[] acc, gyr, oldAcc, oldVelocity, oldDistance, oldGyr, gravity, lowPassAcc, filteredGyr, processedAcc, dynamicAcc;
     int noiseVarianceTimer, gravityTimer;
     double noiseAverage;
     double[][] noiseVariance;
@@ -117,6 +117,8 @@ public class MainActivity extends Activity
         alpha = 0.0;
         oldAcc = null;
         oldGyr = null;
+        acc = new float[3];
+        gyr = new float[3];
         lowPassAcc = new float[3];
         oldVelocity = new float[3];
         oldDistance = new float[3];
@@ -150,8 +152,23 @@ public class MainActivity extends Activity
                     @Override
                     public void onReceive(Context context, Intent intent)
                     {
-                        float[] acc = intent.getFloatArrayExtra("ACC_DATA");
-                        float[] gyr = intent.getFloatArrayExtra("GYR_DATA");
+
+                        acc = (intent.getFloatArrayExtra("ACC_DATA"));
+                        gyr = intent.getFloatArrayExtra("GYR_DATA");
+                        if (acc==null)
+                        {
+                            acc = new float[3];
+                            acc[0]=0.0f;
+                            acc[1]=0.0f;
+                            acc[2]=0.0f;
+                        }
+                        if (gyr==null)
+                        {
+                            gyr = new float[3];
+                            gyr[0]=0.0f;
+                            gyr[1]=0.0f;
+                            gyr[2]=0.0f;
+                        }
                         float[] mag = intent.getFloatArrayExtra("MAG_DATA");
                         if (acc!=null && gyr!=null)
                         {
@@ -173,10 +190,11 @@ public class MainActivity extends Activity
                                               +"Dist : "+   df.format(dynamicAcc[6])+", "+df.format(dynamicAcc[7])+", "+df.format(dynamicAcc[8])+"\n"
                                               +"gyr : "+    df.format(gyr[0])+", "+df.format(gyr[1])+", "+df.format(gyr[2])+"\n";
 
-                            processedAccDataforFile = (dynamicAcc[0])+" "+(dynamicAcc[1])+" "+(dynamicAcc[2])+" "
-                                    +   (dynamicAcc[3])+" "+(dynamicAcc[4])+" "+(dynamicAcc[5])+" "
-                                    +   (dynamicAcc[6])+" "+(dynamicAcc[7])+" "+(dynamicAcc[8])+" "
-                                    +   (processedAcc[9])+" "+(processedAcc[10])+" "+(processedAcc[11])+" "
+                            processedAccDataforFile =
+//                                         (dynamicAcc[0])+" "+(dynamicAcc[1])+" "+(dynamicAcc[2])+" "
+//                                    +   (dynamicAcc[3])+" "+(dynamicAcc[4])+" "+(dynamicAcc[5])+" "
+//                                    +   (dynamicAcc[6])+" "+(dynamicAcc[7])+" "+(dynamicAcc[8])+" "
+//                                    +   (processedAcc[9])+" "+(processedAcc[10])+" "+(processedAcc[11])+" "
                                     +   (gyr[0])+" "+(gyr[1])+" "+(gyr[2])+"\n";
 
                             tvMain.setText(processedAccData) ;

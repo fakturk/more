@@ -113,7 +113,8 @@ public class DynamicAcceleration
     {
         if (oldAccVelDis==null)
         {
-            for (int i = 0; i < oldAccVelDis.length; i++) {
+            oldAccVelDis= new float[9];
+            for (int i = 0; i <9; i++) {
                 oldAccVelDis[i]=0.0f;
             }
         }
