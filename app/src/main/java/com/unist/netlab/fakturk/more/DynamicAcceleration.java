@@ -90,14 +90,52 @@ public class DynamicAcceleration
         return  diffGra;
     }
 
-    void speed()
+    float[] velocity(float[] oldVelocity, float[] dynAcc)
     {
-
+        float[] velocity = new float[]{0.0f, 0.0f, 0.0f};
+        for (int i = 0; i < 3; i++) {
+            velocity[i] = oldVelocity[i]+dynAcc[i];
+        }
+        return velocity;
     }
 
-    void distance()
+    float[] distance(float[] oldDistance, float[] velocity)
     {
+        float[] distance = new float[]{0.0f, 0.0f, 0.0f};
+        for (int i = 0; i < 3; i++) {
+            distance[i] = oldDistance[i]+velocity[i];
+        }
+        return distance;
+    }
 
+    // calculates and return dynamic acceleration, velocity and distance
+    float[] calculate(float[] acc, float[] oldAcc, float[] gyr , float[] oldGyr, float[] oldAccVelDis)
+    {
+        if (oldAccVelDis==null)
+        {
+            for (int i = 0; i < oldAccVelDis.length; i++) {
+                oldAccVelDis[i]=0.0f;
+            }
+        }
+        float[] oldDynamicAcc = new float[]{0.0f, 0.0f, 0.0f};
+        float[] oldVelocity = new float[]{0.0f, 0.0f, 0.0f};
+        float[] oldDistance = new float[]{0.0f, 0.0f, 0.0f};
+        for (int i = 0; i < 3; i++) {
+            oldDynamicAcc[i] = oldAccVelDis[i];
+            oldVelocity[i] = oldAccVelDis[i+3];
+            oldDistance[i] = oldAccVelDis[i+6];
+        }
+        float[] accVelDis = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+        float[] dynAccDiff = dynamicAccDiff(acc,gyr,oldAcc,oldGyr);
+        float[] dynamicAcc = dynamicAcc(oldDynamicAcc, dynAccDiff);
+        float[] velocity = velocity(oldVelocity,dynamicAcc);
+        float[] distance = distance(oldDistance, velocity);
+        for (int i = 0; i < 3; i++) {
+            accVelDis[i]=dynamicAcc[i];
+            accVelDis[i+3]= velocity[i];
+            accVelDis[i+6]=distance[i];
+        }
+        return accVelDis;
     }
 
 }

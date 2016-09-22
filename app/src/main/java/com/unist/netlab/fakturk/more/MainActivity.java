@@ -46,7 +46,7 @@ public class MainActivity extends Activity
     DisplayChange displayChange;
     Display mdisp;
     Double alpha;
-    float[] oldAcc, oldVelocity, oldDistance, gravity, lowPassAcc, filteredGyr, processedAcc;
+    float[] oldAcc, oldVelocity, oldDistance, oldGyr, gravity, lowPassAcc, filteredGyr, processedAcc, dynamicAcc;
     int noiseVarianceTimer, gravityTimer;
     double noiseAverage;
     double[][] noiseVariance;
@@ -71,6 +71,7 @@ public class MainActivity extends Activity
     Filter lpf;
     Gravity g;
     AccProcess process;
+    DynamicAcceleration dynamic;
 
 
 
@@ -114,12 +115,14 @@ public class MainActivity extends Activity
         displayChange = new DisplayChange(tv, tvAngle);
         mdisp = getWindowManager().getDefaultDisplay();
         alpha = 0.0;
-        oldAcc = new float[3];
+        oldAcc = null;
+        oldGyr = null;
         lowPassAcc = new float[3];
         oldVelocity = new float[3];
         oldDistance = new float[3];
         gravity = new float[3];
         processedAcc = null;
+        dynamicAcc = null;
         //Arrays.fill(processedAcc,0);
 
 
@@ -138,6 +141,7 @@ public class MainActivity extends Activity
         lpf = new Filter();
         g= new Gravity();
         process = new AccProcess();
+        dynamic = new DynamicAcceleration();
 
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
@@ -149,24 +153,31 @@ public class MainActivity extends Activity
                         float[] acc = intent.getFloatArrayExtra("ACC_DATA");
                         float[] gyr = intent.getFloatArrayExtra("GYR_DATA");
                         float[] mag = intent.getFloatArrayExtra("MAG_DATA");
-                        if (acc!=null)
+                        if (acc!=null && gyr!=null)
                         {
-                            processedAcc = process.processedData(acc,processedAcc);
-                            processedAccData = "Acc : "+df.format(processedAcc[0])+", "+df.format(processedAcc[1])+", "+df.format(processedAcc[2])+"\n"
-                                    +"Dif : "+   df.format(processedAcc[3])+", "+df.format(processedAcc[4])+", "+df.format(processedAcc[5])+"\n"
-                                    +"Vel : "+   df.format(processedAcc[6])+", "+df.format(processedAcc[7])+", "+df.format(processedAcc[8])+"\n"
-                                    +"hpVel : "+   df.format(processedAcc[9])+", "+df.format(processedAcc[10])+", "+df.format(processedAcc[11])+"\n"
-                                    +"lphpVel : "+   df.format(processedAcc[12])+", "+df.format(processedAcc[13])+", "+df.format(processedAcc[14])+"\n"
-                                    +"Dist : "+   df.format(processedAcc[15])+", "+df.format(processedAcc[16])+", "+df.format(processedAcc[17])+"\n"
-                                    +"hpDist : "+   df.format(processedAcc[18])+", "+df.format(processedAcc[19])+", "+df.format(processedAcc[20])+"\n";
+                            if (oldAcc==null)
+                            {
+                                oldAcc=acc;
+                            }
+                            if (oldGyr==null)
+                            {
+                                oldGyr=gyr;
+                            }
+                            dynamicAcc = dynamic.calculate(acc,oldAcc,gyr,oldGyr, dynamicAcc);
+                            oldAcc = acc;
+                            oldGyr = gyr;
+//                            processedAcc = process.processedData(acc,processedAcc);
 
-                            processedAccDataforFile = (processedAcc[0])+" "+(processedAcc[1])+" "+(processedAcc[2])+" "
-                                    +   (processedAcc[3])+" "+(processedAcc[4])+" "+(processedAcc[5])+" "
-                                    +   (processedAcc[6])+" "+(processedAcc[7])+" "+(processedAcc[8])+" "
+                            processedAccData = "Acc : "+    df.format(dynamicAcc[0])+", "+df.format(dynamicAcc[1])+", "+df.format(dynamicAcc[2])+"\n"
+                                              +"Vel : "+    df.format(dynamicAcc[3])+", "+df.format(dynamicAcc[4])+", "+df.format(dynamicAcc[5])+"\n"
+                                              +"Dist : "+   df.format(dynamicAcc[6])+", "+df.format(dynamicAcc[7])+", "+df.format(dynamicAcc[8])+"\n"
+                                              +"gyr : "+    df.format(gyr[0])+", "+df.format(gyr[1])+", "+df.format(gyr[2])+"\n";
+
+                            processedAccDataforFile = (dynamicAcc[0])+" "+(dynamicAcc[1])+" "+(dynamicAcc[2])+" "
+                                    +   (dynamicAcc[3])+" "+(dynamicAcc[4])+" "+(dynamicAcc[5])+" "
+                                    +   (dynamicAcc[6])+" "+(dynamicAcc[7])+" "+(dynamicAcc[8])+" "
                                     +   (processedAcc[9])+" "+(processedAcc[10])+" "+(processedAcc[11])+" "
-                                    +   (processedAcc[12])+" "+(processedAcc[13])+" "+(processedAcc[14])+" "
-                                    +   (processedAcc[15])+" "+(processedAcc[16])+" "+(processedAcc[17])+" "
-                                    +   (processedAcc[18])+" "+(processedAcc[19])+" "+(processedAcc[20])+"\n";
+                                    +   (gyr[0])+" "+(gyr[1])+" "+(gyr[2])+"\n";
 
                             tvMain.setText(processedAccData) ;
                             try
