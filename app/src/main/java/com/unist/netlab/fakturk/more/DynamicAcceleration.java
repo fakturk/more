@@ -83,9 +83,9 @@ public class DynamicAcceleration
     float[] graDiff(float[] gyrDiff)
     {
         float[] diffGra = new float[]{0.0f, 0.0f, 0.0f};
-        diffGra[0] = (float) Math.cos(gyrDiff[1]*timeInMillis*1000)* GRAVITY_EARTH;
-        diffGra[1] = (float) Math.sin(gyrDiff[0]*timeInMillis*1000)* GRAVITY_EARTH;
-        diffGra[2] = (float) ((Math.sin(gyrDiff[1]*timeInMillis*1000)*Math.cos(gyrDiff[0]*timeInMillis*1000)-1)* GRAVITY_EARTH);
+        diffGra[0] = (float) Math.cos(gyrDiff[1]*timeInMillis)* GRAVITY_EARTH;
+        diffGra[1] = (float) Math.sin(gyrDiff[0]*timeInMillis)* GRAVITY_EARTH;
+        diffGra[2] = (float) ((Math.sin(gyrDiff[1]*timeInMillis)*Math.cos(gyrDiff[0]*timeInMillis)-1)* GRAVITY_EARTH);
 
         return  diffGra;
     }

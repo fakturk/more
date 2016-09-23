@@ -117,8 +117,8 @@ public class MainActivity extends Activity
         alpha = 0.0;
         oldAcc = null;
         oldGyr = null;
-        acc = new float[3];
-        gyr = new float[3];
+        acc = new float[]{0.0f,0.0f,0.0f};
+        gyr = new float[]{0.0f,0.0f,0.0f};
         lowPassAcc = new float[3];
         oldVelocity = new float[3];
         oldDistance = new float[3];
@@ -155,31 +155,33 @@ public class MainActivity extends Activity
 
                         acc = (intent.getFloatArrayExtra("ACC_DATA"));
                         gyr = intent.getFloatArrayExtra("GYR_DATA");
+                        if (acc!=null && oldAcc==null)
+                        {
+                            oldAcc = acc;
+                        }
+                        if (gyr!=null && oldGyr==null)
+                        {
+                            oldGyr = gyr;
+                        }
                         if (acc==null)
                         {
-                            acc = new float[3];
-                            acc[0]=0.0f;
-                            acc[1]=0.0f;
-                            acc[2]=0.0f;
+                            acc = oldAcc;
                         }
                         if (gyr==null)
                         {
-                            gyr = new float[3];
-                            gyr[0]=0.0f;
-                            gyr[1]=0.0f;
-                            gyr[2]=0.0f;
+                            gyr = oldGyr;
                         }
                         float[] mag = intent.getFloatArrayExtra("MAG_DATA");
                         if (acc!=null && gyr!=null)
                         {
-                            if (oldAcc==null)
-                            {
-                                oldAcc=acc;
-                            }
-                            if (oldGyr==null)
-                            {
-                                oldGyr=gyr;
-                            }
+//                            if (oldAcc==null)
+//                            {
+//                                oldAcc=acc;
+//                            }
+//                            if (oldGyr==null)
+//                            {
+//                                oldGyr=gyr;
+//                            }
                             dynamicAcc = dynamic.calculate(acc,oldAcc,gyr,oldGyr, dynamicAcc);
                             oldAcc = acc;
                             oldGyr = gyr;
@@ -191,10 +193,10 @@ public class MainActivity extends Activity
                                               +"gyr : "+    df.format(gyr[0])+", "+df.format(gyr[1])+", "+df.format(gyr[2])+"\n";
 
                             processedAccDataforFile =
-//                                         (dynamicAcc[0])+" "+(dynamicAcc[1])+" "+(dynamicAcc[2])+" "
-//                                    +   (dynamicAcc[3])+" "+(dynamicAcc[4])+" "+(dynamicAcc[5])+" "
-//                                    +   (dynamicAcc[6])+" "+(dynamicAcc[7])+" "+(dynamicAcc[8])+" "
-//                                    +   (processedAcc[9])+" "+(processedAcc[10])+" "+(processedAcc[11])+" "
+                                         (dynamicAcc[0])+" "+(dynamicAcc[1])+" "+(dynamicAcc[2])+" "
+                                    +   (dynamicAcc[3])+" "+(dynamicAcc[4])+" "+(dynamicAcc[5])+" "
+                                    +   (dynamicAcc[6])+" "+(dynamicAcc[7])+" "+(dynamicAcc[8])+" "
+                                    +   (acc[0])+" "+(acc[1])+" "+(acc[2])+" "
                                     +   (gyr[0])+" "+(gyr[1])+" "+(gyr[2])+"\n";
 
                             tvMain.setText(processedAccData) ;
