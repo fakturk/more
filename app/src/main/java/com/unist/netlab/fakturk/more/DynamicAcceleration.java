@@ -80,6 +80,15 @@ public class DynamicAcceleration
         return diffGyr;
     }
 
+    float[] eulerAngles(float[] gyrDiff)
+    {
+        float euler[] = new float[3];
+        for (int i = 0; i < 3; i++) {
+            euler[i] = gyrDiff[i] * timeInMillis;
+        }
+        return euler;
+    }
+
     float[] graDiff(float[] gyrDiff)
     {
         float[] diffGra = new float[]{0.0f, 0.0f, 0.0f};
