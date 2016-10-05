@@ -4,14 +4,15 @@ import static android.hardware.SensorManager.GRAVITY_EARTH;
 
 /**
  * Created by fakturk on 9/8/16.
+ * this class seperate dynamic and static acceleration
  */
 
-public class DynamicAcceleration
+class DynamicAcceleration
 {
-    float[] oldAcc,oldGyr, dynAcc;
-    long timeInMillis;
+    private float[] oldAcc,oldGyr, dynAcc;
+    private long timeInMillis;
 
-    public DynamicAcceleration()
+    DynamicAcceleration()
     {
         timeInMillis = 10;
         oldAcc = new float[]{0.0f, 0.0f, 0.0f};
@@ -29,7 +30,7 @@ public class DynamicAcceleration
     }
 
     //takes acc and gyr values and seperate dynamic acceleration from gravity
-    float[] dynamicAccDiff(float[] acc, float[] gyr, float[] oldAcc, float[] oldGyr)
+    private float[] dynamicAccDiff(float[] acc, float[] gyr, float[] oldAcc, float[] oldGyr)
     {
         float[] dynAccDiff = new float[]{0.0f, 0.0f, 0.0f};
         float[] accDiff = accDiff(oldAcc, acc);
@@ -45,7 +46,7 @@ public class DynamicAcceleration
 
     }
 
-    float[] dynamicAcc(float[] oldDynamicAcc, float[] dynAccDiff)
+    private float[] dynamicAcc(float[] oldDynamicAcc, float[] dynAccDiff)
     {
         float[] dynAcc= new float[]{0.0f, 0.0f, 0.0f};
         for (int i = 0; i < 3; i++)
@@ -57,7 +58,7 @@ public class DynamicAcceleration
     }
 
     //find acceleration difference d_t
-    float[] accDiff(float[] oldAcc, float[] newAcc)
+    private float[] accDiff(float[] oldAcc, float[] newAcc)
     {
         float[] diffAcc = new float[]{0.0f, 0.0f, 0.0f};
 
@@ -69,7 +70,7 @@ public class DynamicAcceleration
     }
 
     //find acceleration difference d_t
-    float[] gyrDiff(float[] oldGyr, float[] newGyr)
+    private float[] gyrDiff(float[] oldGyr, float[] newGyr)
     {
         float[] diffGyr = new float[]{0.0f, 0.0f, 0.0f};
 
@@ -89,7 +90,7 @@ public class DynamicAcceleration
         return euler;
     }
 
-    float[] graDiff(float[] gyrDiff)
+    private float[] graDiff(float[] gyrDiff)
     {
         float[] diffGra = new float[]{0.0f, 0.0f, 0.0f};
         diffGra[0] = (float) Math.cos(gyrDiff[1]*timeInMillis)* GRAVITY_EARTH;
@@ -99,7 +100,7 @@ public class DynamicAcceleration
         return  diffGra;
     }
 
-    float[] velocity(float[] oldVelocity, float[] dynAcc)
+    private float[] velocity(float[] oldVelocity, float[] dynAcc)
     {
         float[] velocity = new float[]{0.0f, 0.0f, 0.0f};
         for (int i = 0; i < 3; i++) {
@@ -108,7 +109,7 @@ public class DynamicAcceleration
         return velocity;
     }
 
-    float[] distance(float[] oldDistance, float[] velocity)
+    private float[] distance(float[] oldDistance, float[] velocity)
     {
         float[] distance = new float[]{0.0f, 0.0f, 0.0f};
         for (int i = 0; i < 3; i++) {
