@@ -182,9 +182,13 @@ public class MainActivity extends Activity
 //                            {
 //                                oldGyr=gyr;
 //                            }
-                            dynamicAcc = dynamic.calculate(acc,oldAcc,gyr,oldGyr, dynamicAcc);
+
+                            dynamicAcc = dynamic.calculate(acc,oldAcc,gyr,oldGyr,gravity, dynamicAcc);
                             oldAcc = acc;
                             oldGyr = gyr;
+                            for (int j = 0; j < 3; j++) {
+                                gravity[j] = dynamicAcc[j+9];
+                            }
 //                            processedAcc = process.processedData(acc,processedAcc);
 
                             processedAccData = "Acc : "+    df.format(dynamicAcc[0])+", "+df.format(dynamicAcc[1])+", "+df.format(dynamicAcc[2])+"\n"

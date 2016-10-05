@@ -6,8 +6,12 @@ package com.unist.netlab.fakturk.more;
 
 public class Orientation
 {
-    float[][] rotationFromEuler(float alpha, float beta, float theta)
+    float[][] rotationFromEuler(float[] euler)
     {
+        float alpha = euler[0];
+        float beta = euler[1];
+        float theta = euler[2];
+
         float[][] R = new float[3][3];
         R[0][0] = (float) (Math.cos(theta) * Math.cos(beta));
         R[0][1] = (float) (-Math.sin(theta) * Math.cos(alpha) + Math.cos(theta) * Math.sin(beta) * Math.sin(alpha));
@@ -26,8 +30,12 @@ public class Orientation
 
     }
 
-    float[][] linearizedRotationFromEuler(float alpha, float beta, float theta)
+    float[][] linearizedRotationFromEuler(float[] euler)
     {
+        float alpha = euler[0];
+        float beta = euler[1];
+        float theta = euler[2];
+
         float[][] R = new float[3][3];
         R[0][0] =  (1);
         R[0][1] =  (-theta  + beta*alpha);

@@ -80,4 +80,13 @@ public class Gravity {
 
     }
 
+    float[] gravityAfterRotaton(float[] gravity, float[][] rotationMatrix)
+    {
+        float[] newGravity = new float[3];
+        for (int i = 0; i < 3; i++) {
+            newGravity[i] = gravity[0]* rotationMatrix[i][0]+ gravity[1]* rotationMatrix[i][1]+gravity[2]* rotationMatrix[i][2];
+        }
+        return newGravity;
+    }
+
 }
