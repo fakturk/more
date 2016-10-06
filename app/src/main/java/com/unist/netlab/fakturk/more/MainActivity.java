@@ -145,6 +145,8 @@ public class MainActivity extends Activity
         process = new AccProcess();
         dynamic = new DynamicAcceleration();
 
+        final boolean[] start = {false};
+
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver()
@@ -157,22 +159,38 @@ public class MainActivity extends Activity
                         gyr = intent.getFloatArrayExtra("GYR_DATA");
                         if (acc!=null && oldAcc==null)
                         {
-                            oldAcc = acc;
+                            oldAcc = new float[3];
+                            System.out.println("case acc!=null && oldAcc==null");
+                            System.arraycopy(acc, 0, oldAcc, 0,acc.length);
+//                            oldAcc = acc;
                         }
                         if (gyr!=null && oldGyr==null)
                         {
-                            oldGyr = gyr;
+                            oldGyr = new float[3];
+                            System.out.println("case gyr!=null && oldGyr==null");
+                            System.arraycopy(gyr,0,oldGyr,0,gyr.length);
+//                            oldGyr = gyr;
                         }
-                        if (acc==null)
+                        if (acc==null && oldAcc!=null)
                         {
-                            acc = oldAcc;
+                            acc = new float[3];
+                            System.out.println("case acc==null");
+                            System.arraycopy(oldAcc, 0, acc, 0,oldAcc.length);
+//                            acc = oldAcc;
                         }
-                        if (gyr==null)
+                        if (gyr==null && oldGyr!=null)
                         {
-                            gyr = oldGyr;
+                            gyr = new float[3];
+                            System.out.println("case gyr==null");
+                            System.arraycopy(oldGyr,0,gyr,0,oldGyr.length);
+//                            gyr = oldGyr;
                         }
                         float[] mag = intent.getFloatArrayExtra("MAG_DATA");
                         if (acc!=null && gyr!=null)
+                        {
+                            start[0] = true;
+                        }
+                        if(start[0])
                         {
 //                            if (oldAcc==null)
 //                            {
@@ -183,9 +201,14 @@ public class MainActivity extends Activity
 //                                oldGyr=gyr;
 //                            }
 
+                            System.out.println("before method acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
                             dynamicAcc = dynamic.calculate(acc,oldAcc,gyr,oldGyr,gravity, dynamicAcc);
-                            oldAcc = acc;
-                            oldGyr = gyr;
+                            System.out.println("after method acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
+                            System.arraycopy(acc, 0, oldAcc, 0,acc.length);
+                            System.arraycopy(gyr,0,oldGyr,0,gyr.length);
+//                            oldAcc = acc;
+//                            oldGyr = gyr;
+                            System.out.println("after assign acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
                             for (int j = 0; j < 3; j++) {
                                 gravity[j] = dynamicAcc[j+9];
                             }
@@ -194,12 +217,14 @@ public class MainActivity extends Activity
                             processedAccData = "Acc : "+    df.format(dynamicAcc[0])+", "+df.format(dynamicAcc[1])+", "+df.format(dynamicAcc[2])+"\n"
                                               +"Vel : "+    df.format(dynamicAcc[3])+", "+df.format(dynamicAcc[4])+", "+df.format(dynamicAcc[5])+"\n"
                                               +"Dist : "+   df.format(dynamicAcc[6])+", "+df.format(dynamicAcc[7])+", "+df.format(dynamicAcc[8])+"\n"
+                                              +"Gra : "+   df.format(dynamicAcc[9])+", "+df.format(dynamicAcc[10])+", "+df.format(dynamicAcc[11])+"\n"
                                               +"gyr : "+    df.format(gyr[0])+", "+df.format(gyr[1])+", "+df.format(gyr[2])+"\n";
 
                             processedAccDataforFile =
                                          (dynamicAcc[0])+" "+(dynamicAcc[1])+" "+(dynamicAcc[2])+" "
                                     +   (dynamicAcc[3])+" "+(dynamicAcc[4])+" "+(dynamicAcc[5])+" "
                                     +   (dynamicAcc[6])+" "+(dynamicAcc[7])+" "+(dynamicAcc[8])+" "
+                                    +   (dynamicAcc[9])+" "+(dynamicAcc[10])+" "+(dynamicAcc[8])+" "
                                     +   (acc[0])+" "+(acc[1])+" "+(acc[2])+" "
                                     +   (gyr[0])+" "+(gyr[1])+" "+(gyr[2])+"\n";
 
