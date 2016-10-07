@@ -32,6 +32,8 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Vector;
 
+import static android.hardware.SensorManager.GRAVITY_EARTH;
+
 
 public class MainActivity extends Activity
 {
@@ -189,6 +191,11 @@ public class MainActivity extends Activity
                         if (acc!=null && gyr!=null)
                         {
                             start[0] = true;
+                            float accNorm = (float) Math.sqrt(Math.pow(acc[0],2)+Math.pow(acc[1],2)+Math.pow(acc[2],2));
+                            for (int j = 0; j < 3; j++)
+                            {
+                                gravity[j] = acc[j]*(GRAVITY_EARTH/accNorm);
+                            }
                         }
                         if(start[0])
                         {
@@ -201,30 +208,32 @@ public class MainActivity extends Activity
 //                                oldGyr=gyr;
 //                            }
 
-                            System.out.println("before method acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
+//                            System.out.println("before method acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
                             dynamicAcc = dynamic.calculate(acc,oldAcc,gyr,oldGyr,gravity, dynamicAcc);
-                            System.out.println("after method acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
+//                            System.out.println("after method acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
                             System.arraycopy(acc, 0, oldAcc, 0,acc.length);
                             System.arraycopy(gyr,0,oldGyr,0,gyr.length);
 //                            oldAcc = acc;
 //                            oldGyr = gyr;
-                            System.out.println("after assign acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
+//                            System.out.println("after assign acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
                             for (int j = 0; j < 3; j++) {
                                 gravity[j] = dynamicAcc[j+9];
                             }
 //                            processedAcc = process.processedData(acc,processedAcc);
 
-                            processedAccData = "Acc : "+    df.format(dynamicAcc[0])+", "+df.format(dynamicAcc[1])+", "+df.format(dynamicAcc[2])+"\n"
-                                              +"Vel : "+    df.format(dynamicAcc[3])+", "+df.format(dynamicAcc[4])+", "+df.format(dynamicAcc[5])+"\n"
-                                              +"Dist : "+   df.format(dynamicAcc[6])+", "+df.format(dynamicAcc[7])+", "+df.format(dynamicAcc[8])+"\n"
-                                              +"Gra : "+   df.format(dynamicAcc[9])+", "+df.format(dynamicAcc[10])+", "+df.format(dynamicAcc[11])+"\n"
-                                              +"gyr : "+    df.format(gyr[0])+", "+df.format(gyr[1])+", "+df.format(gyr[2])+"\n";
+                            processedAccData =
+//                                                "Acc : "+    df.format(dynamicAcc[0])+", "+df.format(dynamicAcc[1])+", "+df.format(dynamicAcc[2])+"\n"
+//                                              +"Vel : "+    df.format(dynamicAcc[3])+", "+df.format(dynamicAcc[4])+", "+df.format(dynamicAcc[5])+"\n"
+//                                              +"Dist : "+   df.format(dynamicAcc[6])+", "+df.format(dynamicAcc[7])+", "+df.format(dynamicAcc[8])+"\n"
+                                              "Gra : "+   df.format(dynamicAcc[9])+", "+df.format(dynamicAcc[10])+", "+df.format(dynamicAcc[11])+"\n"
+//                                              +"gyr : "+    df.format(gyr[0])+", "+df.format(gyr[1])+", "+df.format(gyr[2])+"\n"
+                                                ;
 
                             processedAccDataforFile =
                                          (dynamicAcc[0])+" "+(dynamicAcc[1])+" "+(dynamicAcc[2])+" "
                                     +   (dynamicAcc[3])+" "+(dynamicAcc[4])+" "+(dynamicAcc[5])+" "
                                     +   (dynamicAcc[6])+" "+(dynamicAcc[7])+" "+(dynamicAcc[8])+" "
-                                    +   (dynamicAcc[9])+" "+(dynamicAcc[10])+" "+(dynamicAcc[8])+" "
+                                    +   (dynamicAcc[9])+" "+(dynamicAcc[10])+" "+(dynamicAcc[11])+" "
                                     +   (acc[0])+" "+(acc[1])+" "+(acc[2])+" "
                                     +   (gyr[0])+" "+(gyr[1])+" "+(gyr[2])+"\n";
 

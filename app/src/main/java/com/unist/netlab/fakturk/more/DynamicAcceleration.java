@@ -1,7 +1,5 @@
 package com.unist.netlab.fakturk.more;
 
-import static android.hardware.SensorManager.GRAVITY_EARTH;
-
 /**
  * Created by fakturk on 9/8/16.
  * this class seperate dynamic and static acceleration
@@ -138,7 +136,8 @@ class DynamicAcceleration
     // calculates and return dynamic acceleration, velocity and distance
     float[] calculate(float[] acc, float[] oldAcc, float[] gyr , float[] oldGyr,float[] oldGra, float[] oldAccVelDisGra)
     {
-        System.out.println("inside method acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
+//        System.out.println("inside method acc:"+acc[0]+", "+acc[1]+", "+acc[2]+", oldAcc:"+oldAcc[0]+", "+oldAcc[1]+", "+oldAcc[2]);
+//        System.out.println("inside method gravity:"+oldGra[0]+", "+oldGra[1]+", "+oldGra[2]);
         if (oldAccVelDisGra==null)
         {
             oldAccVelDisGra= new float[9];
